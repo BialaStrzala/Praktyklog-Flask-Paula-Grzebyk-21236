@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Dashboard Studenta
+{% endblock %}
+
+{% block pagecontent %}
+<div>
+    <h1>Dashboard</h1>
+    <p>Witaj, {{ current_user.imie }} {{ current_user.nazwisko }}!</p>
+    <p>Numer indeksu: {{ profil.indeks }}</p>
+    <p>Opiekun uczelniany: {{ opiekun_uczelniany.nazwisko if opiekun_uczelniany else 'Brak' }}</p>
+    <p>Opiekun zakładowy: {{ opiekun_zakladowy.nazwisko if opiekun_zakladowy else 'Brak' }}</p>
+</div>
+{% endblock %}

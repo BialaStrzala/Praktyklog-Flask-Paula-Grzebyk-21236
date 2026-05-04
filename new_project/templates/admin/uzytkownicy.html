@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Lista Użytkowników
+{% endblock %}
+
+{% block pagecontent %}
+<div>
+    <h1>Wszyscy Użytkownicy</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Imię i Nazwisko</th>
+                <th>Email</th>
+                <th>Rola</th>
+                <th>Profil</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for uzytkownik in uzytkownicy %}
+            <tr>
+                <td>{{ uzytkownik.imie }} {{ uzytkownik.nazwisko }}</td>
+                <td>{{ uzytkownik.email }}</td>
+                <td>{{ uzytkownik.rola }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin.profil_uzytkownika', uzytkownik_id=uzytkownik.id) }}">
+                        <button type="submit">Profil</button>
+                    </form>
+                </td>
+                <td><button>Usuń</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

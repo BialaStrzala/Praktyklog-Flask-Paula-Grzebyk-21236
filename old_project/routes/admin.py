@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
-import models
+import old_project.models as models
 from functools import wraps
 from datetime import datetime
 

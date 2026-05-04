@@ -1,0 +1,19 @@
+<div class="sidebar">
+    <ul>
+        {% if current_user.rola == 'student' %}
+            <li><a href="{{ url_for('student.dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('student.dziennik') }}">Dziennik</a></li>
+            <li><a href="{{ url_for('student.efekty_nauki') }}">Efekty nauki</a></li>
+        {% endif %}
+
+        {% if current_user.rola == 'opiekun_zakladowy' or current_user.rola == 'opiekun_uczelniany' %}
+            <li><a href="{{ url_for('opiekun.dashboard') }}">Dashboard</a></li>
+            <li><a href="#">Moi studenci</a></li>
+        {% endif %}
+
+        {% if current_user.rola == 'admin' %}
+            <li><a href="{{ url_for('admin.dashboard') }}">Panel Administratora</a></li>
+            <li><a href="{{ url_for('admin.uzytkownicy') }}">Użytkownicy</a></li>
+        {% endif %}
+    </ul>
+</div>

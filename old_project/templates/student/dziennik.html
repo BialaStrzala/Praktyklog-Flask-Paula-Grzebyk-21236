@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Dziennik Praktyk
+{% endblock %}
+
+{% block pagecontent %}
+<div>
+    <h1>Dziennik praktyk</h1>
+    <h2>Dodaj wpis</h2>
+    <form method="POST">
+        <label>Data:</label>
+        <input type="date" name="date" required><br>
+        <label>Opis:</label>
+        <textarea name="description" required></textarea><br>
+        <label>Liczba godzin:</label>
+        <input type="number" step="0.5" name="hours_worked"><br>
+        <button type="submit">Dodaj</button>
+    </form>
+
+    <h2>Dziennik</h2>
+    <p>Liczba dni roboczych: {{ total_working_days }}</p>
+    <p>Liczba przepracowanych godzin: {{ total_hours_worked }}</p>
+    <form method="POST" action="{{ url_for('student.dziennik_edytuj') }}">
+    <table>
+        <thead>
+            <tr>
+                <td>L.p.</td>
+                <td>Data</td>
+                <td>Opis</td>
+                <td>Ilość godzin</td>
+                <td>Podpis opiekuna</td>
+                <td>Akcje</td>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <input type="hidden" name="log_id[]" value="{{ log.id }}">
+
+                <td><input type="date" name="date[]" value="{{ log.date }}"></td>
+                <td><input type="text" name="description[]" value="{{ log.description }}"></td>
+                <td><input type="text" name="hours_worked[]" value="{{ log.hours_worked }}"></td>
+                <td>{{ 'Tak' if log.workplace_supervisor_signed else '-' }}</td>
+                <td><button type="button" onclick="deleteLog({{ log.id }})">Usuń</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <button type="submit">Zapisz wszystkie zmiany</button>
+    </form>
+    {% for log in logs %}
+    <form id="delete-form-{{ log.id }}"
+        method="POST"
+        action="{{ url_for('student.dziennik_usun', log_id=log.id) }}">
+    </form>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function deleteLog(logId) {
+        if(confirm("Czy na pewno chcesz usunąć ten wpis?")) {
+            document.getElementById("delete-form-" + logId).submit();
+        }
+    }
+</script>
+{% endblock %}

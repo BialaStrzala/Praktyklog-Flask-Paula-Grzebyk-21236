@@ -1,0 +1,34 @@
+<nav class="topbarContainer">
+    <div class="topbarInner">
+        <div class="topbarLeft">
+            <h1>Praktyklog</h1>
+            <span>Dziennik praktyk dla studentów</span>
+        </div>
+
+        <div class="topbarRight">
+            {% if current_user.rola == null %}
+                <a href="{{ url_for('auth.login') }}" class="btn">Zaloguj się</a>
+            {% else %}
+                <span class="username">{{ current_user.imie }} {{ current_user.nazwisko }}</span><span>({{ current_user.rola }})</span>
+            {% endif %}
+            {% if current_user.rola == 'student' %}
+                <a href="{{ url_for('student.profil_studenta') }}" class="btn">Profil</a>
+            {% endif %}
+            {% if current_user.rola == 'opiekun_zakladowy' %}
+                <a href="{{ url_for('opiekun.dashboard') }}" class="btn">Dashboard</a>
+            {% endif %}
+            {% if current_user.rola == 'opiekun_uczelniany' %}
+                <a href="{{ url_for('opiekun.dashboard') }}" class="btn">Dashboard</a>
+            {% endif %}
+            {% if current_user.rola == 'dziekanat' %}
+                <a href="{{ url_for('dziekanat.dashboard') }}" class="btn">Dashboard</a>
+            {% endif %}
+            {% if current_user.rola == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn">Dashboard</a>
+            {% endif %}
+            {% if current_user.rola != null %}
+                <a href="{{ url_for('auth.logout') }}" class="btn logout">Wyloguj</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>

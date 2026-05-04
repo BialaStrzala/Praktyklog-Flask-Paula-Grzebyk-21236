@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
-import models
+import models as models
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -13,12 +13,12 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        user = models.User.query.filter_by(email=email).first()
+        user = models.Uzytkownik.query.filter_by(email=email).first()
         if user and user.check_password(password):
             login_user(user)
             return redirect_based_on_role(user)
         else:
-            flash('Invalid email or password')
+            flash('Niepoprawny email lub haslo')
 
     return render_template('login.html')
 
@@ -29,10 +29,12 @@ def logout():
     return redirect(url_for('auth.login'))
 
 def redirect_based_on_role(user):
-    if user.role == 'student':
+    if user.rola == 'student':
         return redirect(url_for('student.dashboard'))
-    elif user.role == 'supervisor':
-        return redirect(url_for('supervisor.dashboard'))
-    elif user.role == 'admin':
+    elif user.rola == 'opiekun_zakladowy' or user.rola == 'opiekun_uczelniany':
+        return redirect(url_for('opiekun.dashboard'))
+    elif user.rola == 'dziekanat':
+        return redirect(url_for('dziekanat.dashboard'))
+    elif user.rola == 'admin':
         return redirect(url_for('admin.dashboard'))
     return redirect(url_for('auth.login'))

@@ -1,0 +1,130 @@
+/*=============================================================
+=== COLORS ===
+=============================================================*/
+
+:root{
+    --background-color: #fff;
+    --main-text: black;
+    --navbar-background: #191d3d;
+    --navbar-text: #fff;
+    --sidebar-background: #074b88;
+    --sidebar-buttons: #0b6bbf;
+    --sidebar-buttons-hover: #2fadff;
+    --sidebar-buttons-text: #fff;
+    --sidebar-buttons-text-hover: #fff;
+}
+
+/*=============================================================
+=== MAIN CSS ===
+=============================================================*/ 
+
+*{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+.layout{
+    display: flex;
+}
+
+.content{
+    flex: 1;
+    padding: 20px;
+}
+
+/*=============================================================
+=== TOPBAR ===
+=============================================================*/ 
+
+.topbarContainer {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    background-color: var(--navbar-background);
+    color: var(--navbar-text);
+    z-index: 1000;
+    box-shadow: 0 6px 20px rgba(7, 16, 38, 0.2);
+}
+
+.topbarInner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+}
+
+.topbarLeft h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.topbarLeft span {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.topbarRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.username {
+    font-weight: bold;
+}
+
+.btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    background-color: var(--sidebar-background);
+    color: var(--navbar-text);
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn.logout {
+    background-color: #e84118;
+}
+
+/*=============================================================
+=== SIDEBAR ===
+=============================================================*/ 
+
+.sidebar {
+    width: 15%;
+    padding: 1rem;
+    min-height: calc(100vh - 70px);
+    background-color: var(--sidebar-background);
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    margin-bottom: 0.8rem;
+}
+
+.sidebar a {
+    display: block;
+    width: 100%;
+    padding: 0.8rem;
+    border-radius: 1rem;
+    background-color: var(--sidebar-buttons);
+    color: var(--sidebar-buttons-text);
+    text-decoration: none;
+    text-align: center;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.sidebar a:hover {
+    background-color: var(--sidebar-buttons-hover);
+    color: var(--sidebar-buttons-text-hover);
+}

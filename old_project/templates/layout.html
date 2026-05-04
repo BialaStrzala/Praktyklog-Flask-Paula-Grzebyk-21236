@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block pagetitle %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+    {% block styles %}{% endblock %}
+</head>
+<body class="bodyContainer">
+    {% include 'topbar.html' %}
+    
+    <div class="layout">
+        {% include 'sidebar.html' %}
+
+        <main class="content">
+            {% block pagecontent %}{% endblock %}
+        </main>
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

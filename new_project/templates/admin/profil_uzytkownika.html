@@ -1,0 +1,145 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Profil Użytkownika
+{% endblock %}
+
+{% block pagecontent %}
+<div>
+    <h1>Profil Użytkownika</h1>
+
+    <form method="POST" action="{{ url_for('admin.profil_uzytkownika_edytuj') }}">
+        <!-- Wszyscy -->
+        <div>
+            <input type="hidden" name="uzytkownik_id" value="{{ uzytkownik.id }}">
+            <p>Imię i nazwisko:<span>{{ uzytkownik.imie }} {{ uzytkownik.nazwisko }}</span></p>
+            <p>Rola:</p>
+            <select name="rola" required>
+                <option value="student" {% if uzytkownik.rola == 'student' %}selected{% endif %}>Student</option>
+                <option value="opiekun_zakladowy" {% if uzytkownik.rola == 'opiekun_zakladowy' %}selected{% endif %}>Opiekun zakładowy</option>
+                <option value="opiekun_uczelniany" {% if uzytkownik.rola == 'opiekun_uczelniany' %}selected{% endif %}>Opiekun uczelniany</option>
+            </select><br>
+            <label>Email:</label>
+            <input type="text" name="email"value="{{ uzytkownik.email }}">
+        </div>
+
+        <!-- Student -->
+        {% if uzytkownik.rola == 'student' %}
+        <div class="section">
+            <h3>Informacje o studencie</h3>
+            <label>Indeks:</label>
+            <input type="text" name="indeks" value="{{ uzytkownik_profil.indeks if uzytkownik_profil else '' }}" required><br>
+            
+            <label>Rok akademicki:</label>
+            <input type="text" name="rok_akademicki" value="{{ uzytkownik_profil.rok_akademicki if uzytkownik_profil else '' }}" required><br>
+            
+            <label>Semestr:</label>
+            <input type="text" name="semestr" value="{{ uzytkownik_profil.semestr if uzytkownik_profil else '' }}" required><br>
+            
+            <label>Kierunek:</label>
+            <input type="text" name="kierunek" value="{{ uzytkownik_profil.kierunek if uzytkownik_profil else '' }}"><br>
+            
+            <label>Specjalność:</label>
+            <input type="text" name="specjalnosc" value="{{ uzytkownik_profil.specjalnosc if uzytkownik_profil else '' }}"><br>
+        </div>
+        {% endif %}
+
+        <!-- Opiekun -->
+        {% if uzytkownik.rola == 'supervisor' and uzytkownik_profil %}
+        <div class="section">
+            <h3>Supervisor Information</h3>
+            
+            <label>Supervisor Type:</label>
+            <select name="supervisor_type" required>
+                <option value="college" {% if uzytkownik_profil.type == 'college' %}selected{% endif %}>College</option>
+                <option value="workplace" {% if uzytkownik_profil.type == 'workplace' %}selected{% endif %}>Workplace</option>
+            </select><br>
+            
+            <label>Workplace:</label>
+            <input type="text" name="workplace" value="{{ uzytkownik_profil.workplace if uzytkownik_profil else '' }}"><br>
+            
+            {% if uzytkownik_profil.type == 'workplace' %}
+            <h4>Assigned Students</h4>
+            {% if uzytkownik_profil.assigned_students %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Internship Period</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in uzytkownik_profil.assigned_students %}
+                    <tr>
+                        <td>{{ student.full_name }}</td>
+                        <td>{{ student.student_id }}</td>
+                        <td>{{ student.uzytkownik.email }}</td>
+                        <td>
+                            {{ student.internship_start_date.strftime('%Y-%m-%d') if student.internship_start_date else 'N/A' }}
+                            to
+                            {{ student.internship_end_date.strftime('%Y-%m-%d') if student.internship_end_date else 'N/A' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No assigned students</p>
+            {% endif %}
+            {% endif %}
+            
+            {% if uzytkownik_profil.type == 'college' %}
+            <h4>College Students</h4>
+            {% if uzytkownik_profil.college_students %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student ID</th>
+                        <th>Email</th>
+                        <th>Internship Period</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in uzytkownik_profil.college_students %}
+                    <tr>
+                        <td>{{ student.full_name }}</td>
+                        <td>{{ student.student_id }}</td>
+                        <td>{{ student.uzytkownik.email }}</td>
+                        <td>
+                            {{ student.internship_start_date.strftime('%Y-%m-%d') if student.internship_start_date else 'N/A' }}
+                            to
+                            {{ student.internship_end_date.strftime('%Y-%m-%d') if student.internship_end_date else 'N/A' }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No assigned students</p>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <button type="submit">Zapisz zmiany</button>
+        <button type="button" onclick="deleteUser({{ uzytkownik.id }})">Usuń użytkownika</button>
+    </form>
+    <form id="delete-user-{{ uzytkownik.id }}"
+        method="POST"
+        action="{{ url_for('admin.profil_uzytkownika_usun', uzytkownik_id=uzytkownik.id) }}">
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function deleteUser(userId) {
+        if(confirm("Czy na pewno chcesz usunąć tego użytkownika?")) {
+            document.getElementById("delete-user-" + userId).submit();
+        }
+    }
+</script>
+{% endblock %}

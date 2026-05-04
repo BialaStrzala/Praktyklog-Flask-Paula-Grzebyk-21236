@@ -1,5 +1,5 @@
-from app import app, db
-import models
+from old_project.app import app, db
+import old_project.models as models
 
 with app.app_context():
     db.drop_all()
