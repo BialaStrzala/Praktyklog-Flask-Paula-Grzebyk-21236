@@ -67,6 +67,12 @@ TBA
 
 ---
 
+## Diagramy przepływu danych
+
+TBA
+
+---
+
 ## Opis wyboru narzędzi
 
 ### Baza danych – SQLite
@@ -86,3 +92,7 @@ DBeaver Community to darmowe, wieloplatformowe narzędzie graficzne do zarządza
 - Wizualizacji diagramu ERD na podstawie istniejącej bazy danych.
 
 DBeaver obsługuje SQLite, MySQL, PostgreSQL i wiele innych silników, co umożliwia używanie tego samego narzędzia po ewentualnej migracji bazy danych.
+
+### Narzędzie do tworzenia diagramów przepływu - Mermaid
+
+TBA

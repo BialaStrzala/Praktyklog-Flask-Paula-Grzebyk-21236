@@ -43,7 +43,7 @@ def harmonogram():
 # === FORMULARZ PRAKTYK ===
 @student_bp.route('/formularz', methods=['GET', 'POST'])
 @role_required('student')
-def harmonogram():
+def formularz():
     return render_template('formularz.html')
 
 
