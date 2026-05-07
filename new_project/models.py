@@ -17,11 +17,14 @@ class Uzytkownik(db.Model, UserMixin):
     imie = db.Column(db.String(100), nullable=False)
     nazwisko = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    haslo_hash = db.Column(db.String(256), nullable=False)
+    #haslo_hash = db.Column(db.String(256), nullable=False)
     rola = db.Column(db.String(50), nullable=False)  # 'student', 'opiekun_zakladowy', 'opiekun_uczelniany', 'dziekanat', 'admin'
     konto_aktywne = db.Column(db.Boolean, default=True)
     telefon = db.Column(db.String(20), nullable=True)
     utworzono = db.Column(db.DateTime, default=datetime.now)
+
+    auth_provider = db.Column(db.String(50), default="microsoft")
+    external_id = db.Column(db.String(255), unique=True)
 
     student_profil = db.relationship('StudentProfil', backref='uzytkownik', uselist=False)
     opiekun_profil = db.relationship('OpiekunProfil', backref='uzytkownik', uselist=False)

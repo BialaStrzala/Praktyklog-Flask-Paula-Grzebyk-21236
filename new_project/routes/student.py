@@ -23,7 +23,8 @@ def role_required(rola):
 @student_bp.route('/dashboard')
 @role_required('student')
 def dashboard():
-    return render_template('student/dashboard.html')
+    profil = models.StudentProfil.query.filter_by(uzytkownik_id=current_user.id).first()
+    return render_template('student/dashboard.html', profil=profil)
 
 
 # === PROFIL STUDENTA ===
