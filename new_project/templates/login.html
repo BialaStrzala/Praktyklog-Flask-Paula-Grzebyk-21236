@@ -1,21 +1,187 @@
-{% block pagetitle %}
-Login
-{% endblock %}
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Praktyklog - Dziennik Praktyk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-{% block pagecontent %}
-<div>
-    <h1>Login</h1>
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-    <form method="POST">
-        <button type="submit">Login with Microsoft Account</button>
-    </form>
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--navbar-background);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .page-wrap {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .top-strip {
+            padding: 18px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #fff;
+        }
+
+        .logo span {
+            color: var(--sidebar-buttons-hover, #2fadff);
+        }
+
+        .top-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 80px 24px 100px;
+            gap: 0;
+        }
+
+        .main-eyebrow {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #2fadff;
+            background: rgba(47,173,255,0.12);
+            border: 1px solid rgba(47,173,255,0.25);
+            border-radius: 999px;
+            padding: 5px 16px;
+            margin-bottom: 28px;
+        }
+
+        .main h1 {
+            font-size: clamp(38px, 6vw, 64px);
+            font-weight: 700;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            margin-bottom: 22px;
+            max-width: 800px;
+        }
+
+        .main h1 em {
+            font-style: normal;
+            color: #2fadff;
+        }
+
+        .main p {
+            font-size: 17px;
+            color: rgba(255,255,255,0.6);
+            max-width: 520px;
+            line-height: 1.7;
+            margin-bottom: 44px;
+        }
+
+        .main-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn-main-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: var(--sidebar-buttons);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+            letter-spacing: -0.1px;
+        }
+
+        .btn-main-primary:hover {
+            background: #2fadff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(11, 107, 191, 0.45);
+        }
+
+        .btn-main-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.6rem 1rem;
+            background: transparent;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            border: 1.5px solid rgba(255,255,255,0.2);
+            transition: border-color 0.18s, color 0.18s, background 0.18s;
+        }
+
+        .btn-main-secondary:hover {
+            border-color: rgba(255,255,255,0.55);
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            text-align: center;
+            padding: 24px;
+            font-size: 12px;
+            color: var(--sidebar-background);
+        }
+    </style>
+</head>
+<body>
+<div class="page-wrap">
+
+    <header class="top-strip">
+        <div class="logo">Praktyk<span>log</span></div>
+        <div class="top-links">
+            <a href="{{ url_for('auth.login') }}" class="btn-main-secondary">Zaloguj się</a>
+        </div>
+    </header>
+
+    <main class="main">
+        <span class="main-eyebrow">Dziennik Praktyk Studenckich</span>
+        <h1>Praktyki pod <em>kontrolą</em>.<br>W jednym miejscu.</h1>
+        <p>Platforma do prowadzenia dziennika praktyk dla studentów, opiekunów zakładowych i uczelnianych.</p>
+
+        <form method="POST" class="main-actions">
+            <button href="{{ url_for('auth.login') }}" class="btn-main-primary" type="submit">
+                Zaloguj się
+            </button>
+        </form>
+    </main>
+
+    <footer class="footer">
+        &copy; 2026 Praktyklog · Wszelkie prawa zastrzeżone
+    </footer>
+
 </div>
-{% endblock %}
+</body>
+</html>

@@ -1,0 +1,19 @@
+=== DZIENNIK ===
+flowchart TD
+    A[api/dziennik/wpis] -->|Student dodaje nowy wpis| edit{Czy status praktyk pozwala na nowe wpisy?}
+    edit -->|nie| error[Błąd w formularzu]
+    edit -->|tak| walidacja[Walidacja wpisu]
+    walidacja --> opis{Czy opis dnia ma >50 znaków?}
+    opis -->|nie| error
+    opis -->|tak| data{Czy data wpisu jest poprawna i jest w przedziale czasu praktyk?}
+    data -->|nie| error
+    data -->|tak| ok[Dodaj nowy wpis]
+
+=== HARMONOGRAM ===
+flowchart TD
+    A[Znalezienie miejsca praktyk] --> dod[Dodanie harmonogramu praktyk]
+    dod --> B{Sprawdzenie harmonogramu przez dziekanat}
+    B -->|Odrzucenie wniosku| odrz[Wniosek odrzucony]
+    B -->|Akceptacja wniosku| akc[Stworzenie formularza praktyk studenta]
+    akc --> podpis[Podpisanie umowy między Studentem, Zakładem i Uczelnią]
+    podpis --> ok[Student może realizować praktyki]

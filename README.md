@@ -61,18 +61,6 @@ Priorytety: **M** – must have, **S** – should have, **C** – could have
 
 ---
 
-## Diagram ERD bazy danych
-
-TBA
-
----
-
-## Diagramy przepływu danych
-
-TBA
-
----
-
 ## Opis wyboru narzędzi
 
 ### Baza danych – SQLite
@@ -95,4 +83,7 @@ DBeaver obsługuje SQLite, MySQL, PostgreSQL i wiele innych silników, co umożl
 
 ### Narzędzie do tworzenia diagramów przepływu - Mermaid
 
-TBA
+Mermaid to darmowe narzędzie do tworzenia diagramów i schematów za pomocą składni tekstowej, zbliżonej do Markdown.
+W projekcie wykorzystano Mermaid do tworzenia diagramów przepływu dokumentacji praktyk, ponieważ:
+- Kod diagramu przechowywany jest bezpośrednio w repozytorium jako tekst, co umożliwia śledzenie zmian przez Git tak samo jak kod źródłowy.
+- Nie wymaga instalacji – diagram edytuje się w dowolnym edytorze tekstowym lub w przeglądarce pod adresem mermaid.live.

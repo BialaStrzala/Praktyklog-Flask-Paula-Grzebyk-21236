@@ -1,15 +1,113 @@
 {% extends 'layout.html' %}
 
-{% block pagetitle %}
-Dashboard Studenta
-{% endblock %}
+{% block pagetitle %}Dashboard Studenta – Praktyklog{% endblock %}
 
 {% block pagecontent %}
-<div>
-    <h1>Dashboard</h1>
-    <p>Witaj, {{ current_user.imie }} {{ current_user.nazwisko }}!</p>
-    <p>Numer indeksu: {{ profil.indeks }}</p>
-    <p>Opiekun uczelniany: {{ opiekun_uczelniany.nazwisko if opiekun_uczelniany else 'Brak' }}</p>
-    <p>Opiekun zakładowy: {{ opiekun_zakladowy.nazwisko if opiekun_zakladowy else 'Brak' }}</p>
+
+<!-- Page header -->
+<div class="page-header">
+    <h2>Dashboard studenta</h2>
+    <p>Witaj z powrotem, <strong>{{ current_user.imie }} {{ current_user.nazwisko }}</strong> · Nr indeksu: <span class="mono">{{ profil.indeks }}</span></p>
 </div>
+
+<!-- Quick stats row -->
+<div class="stat-grid mb-32">
+    <div class="stat-tile">
+        <div class="stat-label">Formularze praktyk</div>
+        <div class="stat-value">{{ formularze_praktyk | length }}</div>
+        <div class="stat-sub">aktywne i zakończone</div>
+    </div>
+    <div class="stat-tile">
+        <div class="stat-label">Wpisy zatwierdzone</div>
+        <div class="stat-value">18</div>
+        <div class="stat-sub">z 30 wymaganych</div>
+    </div>
+    <div class="stat-tile">
+        <div class="stat-label">Dni pozostało</div>
+        <div class="stat-value">24</div>
+        <div class="stat-sub">do końca praktyk</div>
+    </div>
+    <div class="stat-tile">
+        <div class="stat-label">Status ogólny</div>
+        <div class="stat-value" style="font-size:18px;margin-top:4px;">
+            <span class="badge badge-success">W toku</span>
+        </div>
+        <div class="stat-sub">brak odrzuconych wpisów</div>
+    </div>
+</div>
+
+<!-- Internship forms list -->
+<div class="mb-16 flex items-center justify-between">
+    <h3 style="margin:0;font-size:18px;">Moje formularze praktyk</h3>
+    <a href="{{ url_for('student.dziennik') }}" class="btn btn-primary btn-sm">+ Nowy wpis</a>
+</div>
+
+{% for formularz in formularze_praktyk %}
+<div class="card mb-24">
+
+    <!-- Card header -->
+    <div class="card-header">
+        <div>
+            <p class="card-title">{{ formularz.firma_nazwa or 'Firma Przykładowa Sp. z o.o.' }}</p>
+            <p class="card-subtitle">Formularz #{{ loop.index }} · Dodany {{ formularz.data_dodania or '12.09.2025' }}</p>
+        </div>
+        <span class="badge {% if formularz.status == 'zatwierdzony' %}badge-success{% elif formularz.status == 'odrzucony' %}badge-danger{% elif formularz.status == 'w_toku' %}badge-info{% else %}badge-neutral{% endif %}">
+            {{ formularz.status or 'W toku' }}
+        </span>
+    </div>
+
+    <!-- Details grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px 28px;margin-bottom:22px;">
+
+        <div>
+            <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Firma</p>
+            <p class="fw-600" style="margin:0;">{{ formularz.firma_nazwa or 'Firma Przykładowa Sp. z o.o.' }}</p>
+            <p class="text-sm text-muted" style="margin:2px 0 0;">{{ formularz.firma_adres or 'ul. Kowalska 12, Warszawa' }}</p>
+        </div>
+
+        <div>
+            <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Opiekun zakładowy</p>
+            <p class="fw-600" style="margin:0;">{{ formularz.opiekun_zakladowy.imie ~ ' ' ~ formularz.opiekun_zakladowy.nazwisko if formularz.opiekun_zakladowy else 'Jan Nowak' }}</p>
+            <p class="text-sm text-muted" style="margin:2px 0 0;">{{ formularz.opiekun_zakladowy.email if formularz.opiekun_zakladowy else 'j.nowak@firma.pl' }}</p>
+        </div>
+
+        <div>
+            <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Opiekun uczelniany</p>
+            <p class="fw-600" style="margin:0;">{{ opiekun_uczelniany.imie ~ ' ' ~ opiekun_uczelniany.nazwisko if opiekun_uczelniany else 'dr Anna Kowalska' }}</p>
+            <p class="text-sm text-muted" style="margin:2px 0 0;">{{ opiekun_uczelniany.email if opiekun_uczelniany else 'a.kowalska@uczelnia.edu.pl' }}</p>
+        </div>
+
+        <div>
+            <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;">Okres praktyk</p>
+            <p class="fw-600" style="margin:0;">{{ formularz.data_start or '01.10.2025' }} – {{ formularz.data_koniec or '30.11.2025' }}</p>
+            <p class="text-sm text-muted" style="margin:2px 0 0;">{{ formularz.liczba_dni or '45' }} dni roboczych</p>
+        </div>
+
+    </div>
+
+    <!-- Progress bar -->
+    <div style="margin-bottom:6px;" class="flex items-center justify-between">
+        <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin:0;">Postęp</p>
+        <p class="text-xs text-muted" style="margin:0;font-family:'DM Mono',monospace;">{{ formularz.wpisy_zatwierdzone or 18 }} / {{ formularz.wpisy_wymagane or 30 }} wpisów</p>
+    </div>
+    <div class="progress-wrap" style="margin-bottom:18px;">
+        <div class="progress-bar" style="width: {{ ((formularz.wpisy_zatwierdzone or 18) / (formularz.wpisy_wymagane or 30) * 100) | round | int }}%;"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex gap-8">
+        <a href="{{ url_for('student.dziennik') }}" class="btn btn-primary btn-sm">Otwórz dziennik</a>
+        <a href="#" class="btn btn-secondary btn-sm">Szczegóły formularza</a>
+    </div>
+
+</div>
+{% else %}
+<!-- Empty state -->
+<div class="card" style="text-align:center;padding:56px 28px;">
+    <h3 style="margin-bottom:8px;">Brak formularzy praktyk</h3>
+    <p class="text-muted text-sm" style="margin-bottom:24px;">Nie masz jeszcze żadnych przypisanych formularzy praktyk.<br>Skontaktuj się z opiekunem uczelnianym lub dziekanatem.</p>
+    <a href="#" class="btn btn-primary">Skontaktuj się z dziekanatem</a>
+</div>
+{% endfor %}
+
 {% endblock %}

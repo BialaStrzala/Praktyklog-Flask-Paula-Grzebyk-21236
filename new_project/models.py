@@ -109,12 +109,12 @@ class FormularzPraktyk(db.Model):
 
     opiekun_uczelniany_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=True)
     opiekun_zakladowy_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=True)
-    firma_id = db.Column(db.Integer, db.ForeignKey('firma.id'), nullable=True)
+    harmonogram_praktyk = db.Column(db.Integer, db.ForeignKey('harmonogram_praktyk.id'), nullable=True)
 
     data_rozpoczecia = db.Column(db.Date, nullable=True)
     data_zakonczenia = db.Column(db.Date, nullable=True)
 
-    status = db.Column(db.String(50), nullable=False, default='w_trakcie')
+    status = db.Column(db.String(50), nullable=False, default='w_trakcie') #w_trakcie, #zakonczone, #porzucone
 
     opinia_opiekuna_zakladowego = db.Column(db.Text, nullable=True)
     opinia_opiekuna_uczelnianego = db.Column(db.Text, nullable=True)
@@ -128,7 +128,6 @@ class FormularzPraktyk(db.Model):
     utworzono = db.Column(db.DateTime, default=datetime.now)
     zaktualizowano = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    harmonogramy = db.relationship('HarmonogramPraktyk', backref='formularz_praktyk', lazy=True)
     efekty_uczenia = db.relationship('EfektUczeniaFormularz', backref='formularz_praktyk', lazy=True)
 
 
@@ -146,14 +145,17 @@ class EfektUczeniaFormularz(db.Model):
     efekt = db.relationship('EfektUczenia', backref='powiazania_formularz')
 
 
-# === HARMONOGRAM PRAKTYK ===
+# === HARMONOGRAM PRAKTYK - Wniosek o praktyki ===
 class HarmonogramPraktyk(db.Model):
     __tablename__ = 'harmonogram_praktyk'
 
     id = db.Column(db.Integer, primary_key=True)
-    formularz_praktyk_id = db.Column(db.Integer, db.ForeignKey('formularz_praktyk.id'), nullable=False)
-    dzial = db.Column(db.String(200), nullable=False)
+    student_id = db.Column(db.Integer, db.ForeignKey('student_profil.id'), nullable=False)
+    opiekun_zakladowy_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=False)
+    firma_id = db.Column(db.Integer, db.ForeignKey('firma.id'), nullable=True)
+
     planowana_liczba_dni = db.Column(db.Integer, nullable=False)
+    status = db.Column(db.String(50), nullable=False, default="oczekuje") #oczekuje, zaakceptowany, odrzucony
 
     efekty_harmonogramu = db.relationship('EfektUczeniaHarmonogram', backref='harmonogram', lazy=True)
 
