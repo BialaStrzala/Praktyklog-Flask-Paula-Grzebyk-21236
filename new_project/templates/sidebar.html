@@ -3,6 +3,7 @@
         {% if current_user.rola == 'student' %}
             <li><a href="{{ url_for('student.dashboard') }}">Dashboard</a></li>
             <li><a href="{{ url_for('student.dziennik') }}">Dziennik</a></li>
+            <li><a href="{{ url_for('student.moj_harmonogram') }}">Harmonogram</a></li>
         {% endif %}
 
         {% if current_user.rola == 'opiekun_zakladowy' or current_user.rola == 'opiekun_uczelniany' %}

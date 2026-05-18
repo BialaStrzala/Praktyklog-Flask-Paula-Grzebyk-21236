@@ -106,9 +106,9 @@ class FormularzPraktyk(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student_profil.id'), nullable=False)
-
     opiekun_uczelniany_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=True)
     opiekun_zakladowy_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=True)
+    firma_id = db.Column(db.Integer, db.ForeignKey('firma.id'), nullable=True)
     harmonogram_praktyk = db.Column(db.Integer, db.ForeignKey('harmonogram_praktyk.id'), nullable=True)
 
     data_rozpoczecia = db.Column(db.Date, nullable=True)
@@ -154,8 +154,15 @@ class HarmonogramPraktyk(db.Model):
     opiekun_zakladowy_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=False)
     firma_id = db.Column(db.Integer, db.ForeignKey('firma.id'), nullable=True)
 
+    opiekun_zakladowy = db.relationship('OpiekunProfil', foreign_keys=[opiekun_zakladowy_id], lazy=True)
+    firma = db.relationship('Firma', foreign_keys=[firma_id], lazy=True)
+
     planowana_liczba_dni = db.Column(db.Integer, nullable=False)
+    planowana_data_rozpoczecia = db.Column(db.Date, nullable=True)
+    planowana_data_zakonczenia = db.Column(db.Date, nullable=True)
+    
     status = db.Column(db.String(50), nullable=False, default="oczekuje") #oczekuje, zaakceptowany, odrzucony
+    powod_odrzucenia = db.Column(db.String(500), nullable=True)
 
     efekty_harmonogramu = db.relationship('EfektUczeniaHarmonogram', backref='harmonogram', lazy=True)
 

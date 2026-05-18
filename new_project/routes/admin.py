@@ -17,11 +17,18 @@ def role_required(rola):
         return decorated_function
     return decorator
 
+
 # === DASHBOARD ===
 @admin_bp.route('/dashboard')
 @role_required('admin')
 def dashboard():
     return render_template('admin/dashboard.html')
+
+
+# ============================================================================
+# === UZYTKOWNICY ===
+# ============================================================================
+
 
 # === UZYTKOWNICY ===
 @admin_bp.route('/uzytkownicy')

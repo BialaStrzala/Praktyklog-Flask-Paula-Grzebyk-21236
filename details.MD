@@ -225,7 +225,6 @@ Rozdzielenie warstwy backendowej od frontendowej poprzez stworzenie API.
   * POST (tworzenie)
   * PUT/PATCH (edycja)
   * DELETE (usuwanie)
-* zwracanie danych w formacie JSON
 * walidacja danych wejściowych
 * obsługa błędów (statusy HTTP: 200, 400, 404, 500)
 

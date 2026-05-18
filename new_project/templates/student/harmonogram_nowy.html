@@ -1,0 +1,133 @@
+{% extends 'layout.html' %}
+{% block pagetitle %}
+    {% if harmonogram %}Edytuj harmonogram{% else %}Nowy harmonogram{% endif %} – Praktyklog
+{% endblock %}
+
+{% block pagecontent %}
+
+<div class="page-header">
+    <h2>{% if harmonogram %}Edytuj harmonogram praktyk{% else %}Nowy harmonogram praktyk{% endif %}</h2>
+    <p class="text-muted text-sm">
+        {% if harmonogram %}
+            Możesz edytować harmonogram dopóki ma status <strong>Oczekuje</strong>.
+        {% else %}
+            Wypełnij poniższy formularz i dodaj planowane efekty pracy.
+        {% endif %}
+    </p>
+</div>
+
+<form method="POST">
+
+    {# ── Section 1: Basic info ── #}
+    <div class="card mb-24">
+        <div class="card-header">
+            <div>
+                <p class="card-title">Podstawowe informacje</p>
+                <p class="card-subtitle">Firma, opiekun oraz planowane daty praktyk</p>
+            </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px 24px;">
+
+            <div class="form-group mb-0">
+                <label class="form-label" for="firma_id">Firma</label>
+                <select class="form-control" id="firma_id" name="firma_id">
+                    <option value="">— wybierz firmę —</option>
+                    {% for firma in firmy %}
+                        <option value="{{ firma.id }}"
+                            {% if harmonogram and harmonogram.firma_id == firma.id %}selected{% endif %}>
+                            {{ firma.nazwa }}{% if firma.adres %} ({{ firma.adres }}){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="form-hint">Jeśli firmy nie ma na liście, skontaktuj się z dziekanatem.</p>
+            </div>
+
+            <div class="form-group mb-0">
+                <label class="form-label" for="opiekun_zakladowy_id">Opiekun zakładowy</label>
+                <select class="form-control" id="opiekun_zakladowy_id" name="opiekun_zakladowy_id">
+                    <option value="">— wybierz opiekuna —</option>
+                    {% for op in opiekunowie_zakladowi %}
+                        <option value="{{ op.id }}"
+                            {% if harmonogram and harmonogram.opiekun_zakladowy_id == op.id %}selected{% endif %}>
+                            {{ op.uzytkownik.imie }} {{ op.uzytkownik.nazwisko }}
+                            {% if op.firma %} · {{ op.firma.nazwa }}{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group mb-0">
+                <label class="form-label" for="planowana_liczba_dni">Planowana liczba dni roboczych</label>
+                <input class="form-control" type="number" id="planowana_liczba_dni"
+                       name="planowana_liczba_dni" min="120" max="120" required
+                       value="{{ harmonogram.planowana_liczba_dni if harmonogram else 120 }}"
+                       placeholder="120">
+                <p class="form-hint">Praktyka musi trwać dokładnie <strong>120 dni roboczych</strong>.</p>
+            </div>
+
+            <div class="form-group mb-0">
+                <label class="form-label" for="planowana_data_rozpoczecia">Planowana data rozpoczęcia</label>
+                <input class="form-control" type="date" id="planowana_data_rozpoczecia"
+                       name="planowana_data_rozpoczecia"
+                       value="{{ harmonogram.planowana_data_rozpoczecia.isoformat() if harmonogram and harmonogram.planowana_data_rozpoczecia else '' }}">
+            </div>
+
+            <div class="form-group mb-0">
+                <label class="form-label" for="planowana_data_zakonczenia">Planowana data zakończenia</label>
+                <input class="form-control" type="date" id="planowana_data_zakonczenia"
+                       name="planowana_data_zakonczenia"
+                       value="{{ harmonogram.planowana_data_zakonczenia.isoformat() if harmonogram and harmonogram.planowana_data_zakonczenia else '' }}">
+            </div>
+
+        </div>
+    </div>
+
+    {# ── Section 2: Effects table ── #}
+    <div class="card mb-24">
+        <div class="card-header">
+            <div>
+                <p class="card-title">Planowane efekty uczenia się</p>
+                <p class="card-subtitle">Wszystkie 13 efektów uczenia się – opisz przykładowe prace dla każdego</p>
+            </div>
+        </div>
+
+        <div class="table-wrapper" style="box-shadow:none;border:none;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:80px;">Kod</th>
+                        <th>Opis efektu uczenia się</th>
+                        <th>Przykładowe prace wykonywane przez praktykanta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in efekty_uczenia_all %}
+                    <tr>
+                        <td style="font-weight:bold;vertical-align:top;padding-top:12px;">{{ e.kod }}</td>
+                        <td style="font-size:0.95em;vertical-align:top;padding-top:12px;">{{ e.opis }}</td>
+                        <td>
+                            <textarea name="efekt_opis[]" class="form-control"
+                                      style="min-height:80px;resize:vertical;"
+                                      required
+                                      placeholder="Opisz, jak realizować będziesz ten efekt podczas praktyki…"
+                            >{% if harmonogram and harmonogram.efekty_harmonogramu %}{% for pozycja in harmonogram.efekty_harmonogramu %}{% if pozycja.efekt_uczenia_id == e.id %}{{ pozycja.opis or '' }}{% endif %}{% endfor %}{% endif %}</textarea>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# ── Actions ── #}
+    <div style="display:flex;gap:10px;align-items:center;">
+        <button type="submit" class="btn btn-primary btn-lg">
+            {% if harmonogram %}💾 Zapisz zmiany{% else %}📤 Wyślij do zatwierdzenia{% endif %}
+        </button>
+        <a href="{{ url_for('student.moj_harmonogram') }}" class="btn btn-secondary">Anuluj</a>
+    </div>
+
+</form>
+
+{% endblock %}

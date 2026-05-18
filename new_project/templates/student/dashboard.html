@@ -105,8 +105,8 @@
 <!-- Empty state -->
 <div class="card" style="text-align:center;padding:56px 28px;">
     <h3 style="margin-bottom:8px;">Brak formularzy praktyk</h3>
-    <p class="text-muted text-sm" style="margin-bottom:24px;">Nie masz jeszcze żadnych przypisanych formularzy praktyk.<br>Skontaktuj się z opiekunem uczelnianym lub dziekanatem.</p>
-    <a href="#" class="btn btn-primary">Skontaktuj się z dziekanatem</a>
+    <p class="text-muted text-sm" style="margin-bottom:24px;">Nie masz jeszcze żadnych przypisanych formularzy praktyk.</p>
+    <a href="{{ url_for('student.nowy_harmonogram') }}" class="btn btn-primary">Wyślij nowy harmonogram</a>
 </div>
 {% endfor %}
 

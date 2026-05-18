@@ -1,0 +1,173 @@
+{% extends 'layout.html' %}
+{% block pagetitle %}Przegląd harmonogramu #{{ harmonogram.id }} – Praktyklog{% endblock %}
+
+{% block pagecontent %}
+
+{# ── Status config ── #}
+{% set status_cfg = {
+    'oczekuje':      ('badge-warning',  'Oczekuje na zatwierdzenie', '⏳'),
+    'zaakceptowany': ('badge-success',  'Zaakceptowany',             '✅'),
+    'odrzucony':     ('badge-danger',   'Odrzucony',                 '❌'),
+} %}
+{% set s_class, s_label, s_icon = status_cfg.get(harmonogram.status, ('badge-neutral','Nieznany','?')) %}
+
+{# ── Page header ── #}
+<div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+    <div>
+        <h2 style="margin-bottom:4px;">Harmonogram #{{ harmonogram.id }}</h2>
+        <p class="text-muted text-sm">
+            Student:
+            <strong>{{ harmonogram.student.uzytkownik.imie }} {{ harmonogram.student.uzytkownik.nazwisko }}</strong>
+            · indeks <span class="mono">{{ harmonogram.student.indeks or '—' }}</span>
+        </p>
+    </div>
+    <span class="badge {{ s_class }}" style="font-size:13px;padding:6px 14px;">
+        {{ s_icon }} {{ s_label }}
+    </span>
+</div>
+
+{# ── Info grid ── #}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:28px;">
+
+    <div class="card" style="padding:20px 22px;">
+        <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Firma</p>
+        <p class="fw-700" style="margin:0;">{{ harmonogram.firma.nazwa if harmonogram.firma else '—' }}</p>
+        <p class="text-sm text-muted" style="margin:3px 0 0;">{{ harmonogram.firma.adres if harmonogram.firma else '' }}</p>
+    </div>
+
+    <div class="card" style="padding:20px 22px;">
+        <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Opiekun zakładowy</p>
+        {% if harmonogram.opiekun_zakladowy %}
+            <p class="fw-700" style="margin:0;">
+                {{ harmonogram.opiekun_zakladowy.uzytkownik.imie }}
+                {{ harmonogram.opiekun_zakladowy.uzytkownik.nazwisko }}
+            </p>
+            <p class="text-sm text-muted" style="margin:3px 0 0;">
+                {{ harmonogram.opiekun_zakladowy.uzytkownik.email }}
+            </p>
+        {% else %}
+            <p class="text-muted" style="margin:0;">—</p>
+        {% endif %}
+    </div>
+
+    <div class="card" style="padding:20px 22px;">
+        <p class="text-xs text-muted fw-700" style="text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;">Planowany okres</p>
+        <p class="fw-700" style="margin:0;">
+            {% if harmonogram.planowana_data_rozpoczecia and harmonogram.planowana_data_zakonczenia %}
+                {{ harmonogram.planowana_data_rozpoczecia.strftime('%d.%m.%Y') }}
+                –
+                {{ harmonogram.planowana_data_zakonczenia.strftime('%d.%m.%Y') }}
+            {% else %}—{% endif %}
+        </p>
+        <p class="text-sm text-muted" style="margin:3px 0 0;">{{ harmonogram.planowana_liczba_dni }} dni</p>
+    </div>
+
+</div>
+
+{# ── Effects table ── #}
+<div class="mb-16">
+    <h3 style="font-size:17px;margin-bottom:4px;">Planowane efekty uczenia się</h3>
+    <p class="text-muted text-sm">Zadeklarowane przez studenta</p>
+</div>
+
+{% if harmonogram.efekty_harmonogramu %}
+<div class="table-wrapper mb-32">
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="width:80px;">Kod</th>
+                <th>Efekt uczenia się</th>
+                <th>Planowany sposób realizacji</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for poz in harmonogram.efekty_harmonogramu %}
+            <tr>
+                <td><span class="badge badge-accent mono">{{ poz.efekt.kod }}</span></td>
+                <td class="text-sm">{{ poz.efekt.opis }}</td>
+                <td class="text-sm">{{ poz.opis or '<span class="text-muted">—</span>' | safe }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card mb-32" style="text-align:center;padding:32px;color:var(--main-text-muted);">
+    Brak zadeklarowanych efektów uczenia się.
+</div>
+{% endif %}
+
+{# ── Action panel – only shown when still pending ── #}
+{% if harmonogram.status == 'oczekuje' %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:860px;">
+
+    {# APPROVE card #}
+    <div class="card" style="border-top:4px solid var(--success);">
+        <div class="card-header" style="margin-bottom:16px;padding-bottom:12px;">
+            <div>
+                <p class="card-title" style="color:var(--success);">✅ Zatwierdź harmonogram</p>
+                <p class="card-subtitle">Wymagane: przypisanie opiekuna uczelnianego</p>
+            </div>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="akcja" value="zatwierdz">
+
+            <div class="form-group">
+                <label class="form-label" for="opiekun_uczelniany_id">Opiekun uczelniany <span style="color:var(--danger);">*</span></label>
+                <select class="form-control" id="opiekun_uczelniany_id" name="opiekun_uczelniany_id" required>
+                    <option value="">— wybierz opiekuna —</option>
+                    {% for op in opiekunowie_uczelniany %}
+                        <option value="{{ op.id }}">
+                            {{ op.uzytkownik.imie }} {{ op.uzytkownik.nazwisko }}
+                            ({{ op.uzytkownik.email }})
+                        </option>
+                    {% endfor %}
+                </select>
+                <p class="form-hint">Po zatwierdzeniu automatycznie zostanie stworzony formularz praktyk.</p>
+            </div>
+
+            <button type="submit" class="btn btn-success" style="width:100%;">
+                Zatwierdź i utwórz formularz praktyk
+            </button>
+        </form>
+    </div>
+
+    {# REJECT card #}
+    <div class="card" style="border-top:4px solid var(--danger);">
+        <div class="card-header" style="margin-bottom:16px;padding-bottom:12px;">
+            <div>
+                <p class="card-title" style="color:var(--danger);">❌ Odrzuć harmonogram</p>
+                <p class="card-subtitle">Student zobaczy powód i będzie mógł przesłać ponownie</p>
+            </div>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="akcja" value="odrzuc">
+
+            <div class="form-group">
+                <label class="form-label" for="powod_odrzucenia">Powód odrzucenia <span style="color:var(--danger);">*</span></label>
+                <textarea class="form-control" id="powod_odrzucenia" name="powod_odrzucenia"
+                          rows="4" required
+                          placeholder="Opisz, co student powinien poprawić lub uzupełnić…"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-danger" style="width:100%;"
+                    onclick="return confirm('Na pewno chcesz odrzucić ten harmonogram?')">
+                Odrzuć harmonogram
+            </button>
+        </form>
+    </div>
+
+</div>
+
+{% elif harmonogram.status == 'odrzucony' and harmonogram.powod_odrzucenia %}
+<div class="alert alert-danger">
+    <strong>Powód odrzucenia:</strong> {{ harmonogram.powod_odrzucenia }}
+</div>
+{% endif %}
+
+{# ── Back link ── #}
+<div style="margin-top:28px;">
+    <a href="{{ url_for('dziekanat.dashboard') }}" class="btn btn-secondary btn-sm">← Powrót do dashboardu</a>
+</div>
+
+{% endblock %}
