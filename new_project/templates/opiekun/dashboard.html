@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Dashboard Opiekuna
+{% endblock %}
+
+{% block pagecontent %}
+<div>
+    <h1>Dashboard Opiekuna</h1>
+    <p>Witaj, {{ current_user.imie }}!</p>
+</div>
+<div>
+    Wpisy do zatwierdzenia: ...
+</div>
+{% endblock %}

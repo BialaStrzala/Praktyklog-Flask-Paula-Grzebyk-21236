@@ -1,0 +1,350 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+
+            <h1 class="page-title mb-1">
+                Harmonogram praktyk
+            </h1>
+
+            <p class="text-muted mb-0">
+                Szczegółowe informacje o przesłanym harmonogramie.
+            </p>
+
+        </div>
+
+        <a
+            href="{{ url_for('admin.harmonogramy') }}"
+            class="btn btn-outline-secondary">
+
+            Powrót
+
+        </a>
+
+    </div>
+
+
+
+        <!-- MAIN -->
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-header bg-white border-bottom-0 py-4">
+
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+
+                    <div>
+
+                        <h3 class="mb-1">
+                            {{ harmonogram.firma.nazwa }}
+                        </h3>
+
+                        <p class="text-muted mb-0">
+                            Harmonogram przesłany przez studenta
+                        </p>
+
+                    </div>
+
+                    {% if harmonogram.status == 'zaakceptowany' %}
+                        <span class="badge badge-success">
+                            Zatwierdzony
+                        </span>
+                    {% elif harmonogram.status == 'odrzucony' %}
+                        <span class="badge badge-danger">
+                            Odrzucony
+                        </span>
+                    {% else %}
+                        <span class="badge badge-warning">
+                            Oczekuje na akceptację
+                        </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="card-body">
+
+                <!-- STUDENT -->
+                <div class="row mb-4">
+
+                    <div class="col-md-6 col-xl-3 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Student
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.student.uzytkownik.imie }}
+                            {{ harmonogram.student.uzytkownik.nazwisko }}
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-6 col-xl-3 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Numer indeksu
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.student.indeks or 'Brak danych' }}
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-6 col-xl-3 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Kierunek
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.student.kierunek or 'Brak danych' }}
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-6 col-xl-3 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Semestr
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.student.semestr or 'Brak danych' }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- FIRMA -->
+                <div class="row mb-4">
+
+                    <div class="col-md-6 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Firma
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.firma.nazwa }}
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Adres firmy
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.firma.adres or 'Brak adresu' }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- OPIEKUNOWIE -->
+                <div class="row mb-4">
+
+                    <!-- ZAKLADOWY -->
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Opiekun zakładowy
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{% if harmonogram.opiekun_zakladowy %}{{ harmonogram.opiekun_zakladowy.uzytkownik.imie }} {{ harmonogram.opiekun_zakladowy.uzytkownik.nazwisko }}{% else %}Brak{% endif %}"
+                            disabled>
+
+                    </div>
+
+                    <!-- UCZELNIANY -->
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Opiekun uczelniany
+                        </label>
+
+                        <select
+                            name="opiekun_uczelniany_id"
+                            class="form-control"
+                            required>
+
+                            <option value="">
+                                Wybierz opiekuna
+                            </option>
+
+                            {% for opiekun in opiekunowie_uczelniani %}
+
+                            <option
+                                value="{{ opiekun.id }}"
+                                {% if harmonogram.opiekun_uczelniany_id == opiekun.id %}selected{% endif %}>
+
+                                {{ opiekun.uzytkownik.imie }}
+                                {{ opiekun.uzytkownik.nazwisko }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <!-- TERMIN -->
+                <div class="row mb-4">
+
+                    <div class="col-md-4 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Data rozpoczęcia
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.data_rozpoczecia.strftime('%d.%m.%Y') if harmonogram.data_rozpoczecia else 'Brak danych' }}
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Data zakończenia
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.data_zakonczenia.strftime('%d.%m.%Y') if harmonogram.data_zakonczenia else 'Brak danych' }}
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Liczba dni roboczych
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.planowana_liczba_dni or 'Brak danych' }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- DECISION -->
+<div class="card shadow-sm border-0">
+
+    <div class="card-header bg-white">
+
+        <h4 class="mb-0">
+            Decyzja administratora
+        </h4>
+
+    </div>
+
+    <div class="card-body">
+
+        <!-- AKCEPTUJ -->
+        <form
+            method="POST"
+            action="{{ url_for('admin.harmonogram_akceptuj', harmonogram_id=harmonogram.id) }}"
+            class="mb-4">
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Opiekun uczelniany
+                </label>
+
+                <select
+                    name="opiekun_uczelniany_id"
+                    class="form-control"
+                    required>
+
+                    <option value="">
+                        Wybierz opiekuna
+                    </option>
+
+                    {% for opiekun in opiekunowie_uczelniani %}
+
+                    <option
+                        value="{{ opiekun.id }}"
+                        {% if harmonogram.opiekun_uczelniany_id == opiekun.id %}selected{% endif %}>
+
+                        {{ opiekun.uzytkownik.imie }}
+                        {{ opiekun.uzytkownik.nazwisko }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-success">
+
+                Zatwierdź harmonogram
+            </button>
+
+        </form>
+
+        <hr>
+
+        <!-- ODRZUC -->
+        <form
+            method="POST"
+            action="{{ url_for('admin.harmonogram_odrzuc', harmonogram_id=harmonogram.id) }}">
+
+            <div class="mb-4">
+
+                <label class="form-label">
+                    Powód odrzucenia
+                </label>
+
+                <textarea
+                    name="powod_odrzucenia"
+                    class="form-control"
+                    rows="5"
+                    placeholder="Podaj powód odrzucenia harmonogramu">{{ harmonogram.powod_odrzucenia or '' }}</textarea>
+
+            </div>
+
+            <button
+                type="submit"
+                class="btn btn-danger">
+
+                Odrzuć harmonogram
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,461 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Formularz Praktyk
+{% endblock %}
+
+{% block pagecontent %}
+
+{% if formularz %}
+
+{% set status_map = {
+    'w_trakcie': ('W trakcie', 'badge badge-warning'),
+    'zakonczone': ('Zakończone', 'badge badge-success'),
+    'porzucone': ('Porzucone', 'badge badge-danger')
+} %}
+
+{% set status_label, status_class = status_map.get(
+    formularz.status,
+    ('Nieznany', 'badge badge-secondary')
+) %}
+
+<div class="card shadow-sm border-0">
+
+    <!-- ===================================================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================================================== -->
+
+    <div class="card-header bg-white d-flex justify-content-between align-items-start">
+
+        <div>
+            <h3 class="mb-1">
+                {{ formularz.firma.nazwa if formularz.firma else 'Brak firmy' }}
+            </h3>
+
+            <p class="text-muted mb-0">
+                Formularz praktyk #{{ formularz.id }}
+            </p>
+        </div>
+
+        <div>
+            <span class="{{ status_class }}">
+                {{ status_label }}
+            </span>
+            <a href="{{ url_for('student.edytuj_harmonogram', harmonogram_id=formularz.harmonogram.id) }}"
+            class="btn btn-outline-primary btn-sm">
+                Harmonogram
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ===================================================================================== -->
+    <!-- BODY -->
+    <!-- ===================================================================================== -->
+
+    <div class="card-body">
+
+        <!-- ================================================================================= -->
+        <!-- STUDENT -->
+        <!-- ================================================================================= -->
+
+        <div class="mb-5">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Student</h5>
+
+                <a href="{{ url_for('student.profil_uzytkownika') }}"
+                   class="btn btn-outline-primary btn-sm">
+                    Otwórz profil
+                </a>
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Imię i nazwisko</p>
+                    <p class="fw-bold mb-0">
+                        {{ formularz.student.uzytkownik.imie }}
+                        {{ formularz.student.uzytkownik.nazwisko }}
+                    </p>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Email</p>
+                    <p class="mb-0">
+                        {{ formularz.student.uzytkownik.email }}
+                    </p>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Telefon</p>
+                    <p class="mb-0">
+                        {{ formularz.student.uzytkownik.telefon or 'Brak telefonu' }}
+                    </p>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Indeks</p>
+                    <p class="fw-bold mb-0">
+                        {{ formularz.student.indeks or 'Brak' }}
+                    </p>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Kierunek</p>
+                    <p class="mb-0">
+                        {{ formularz.student.kierunek or 'Brak' }}
+                    </p>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Specjalność</p>
+                    <p class="mb-0">
+                        {{ formularz.student.specjalnosc or 'Brak' }}
+                    </p>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Semestr</p>
+                    <p class="mb-0">
+                        {{ formularz.student.semestr or 'Brak' }}
+                    </p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================================================================================= -->
+        <!-- OPIEKUNOWIE -->
+        <!-- ================================================================================= -->
+
+        <div class="mb-5">
+
+            <h5 class="mb-3">Opiekunowie</h5>
+
+            <div class="row">
+
+                <!-- Opiekun zakładowy -->
+                <div class="col-md-6">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Opiekun zakładowy</h6>
+
+                            {% if formularz.opiekun_zakladowy %}
+                            <a href="#"
+                               class="btn btn-outline-secondary btn-sm">
+                                Profil
+                            </a>
+                            {% endif %}
+                        </div>
+
+                        {% if formularz.opiekun_zakladowy %}
+
+                            <p class="fw-bold mb-1">
+                                {{ formularz.opiekun_zakladowy.uzytkownik.imie }}
+                                {{ formularz.opiekun_zakladowy.uzytkownik.nazwisko }}
+                            </p>
+
+                            <p class="text-muted mb-1">
+                                {{ formularz.opiekun_zakladowy.uzytkownik.email }}
+                            </p>
+
+                            <p class="small text-muted mb-0">
+                                {{ formularz.opiekun_zakladowy.firma.nazwa if formularz.opiekun_zakladowy.firma else '' }}
+                            </p>
+
+                        {% else %}
+
+                            <p class="text-muted mb-0">
+                                Brak przypisanego opiekuna zakładowego.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+                <!-- Opiekun uczelniany -->
+                <div class="col-md-6">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">Opiekun uczelniany</h6>
+
+                            {% if formularz.opiekun_uczelniany %}
+                            <a href="#"
+                               class="btn btn-outline-secondary btn-sm">
+                                Profil
+                            </a>
+                            {% endif %}
+                        </div>
+
+                        {% if formularz.opiekun_uczelniany %}
+
+                            <p class="fw-bold mb-1">
+                                {{ formularz.opiekun_uczelniany.uzytkownik.imie }}
+                                {{ formularz.opiekun_uczelniany.uzytkownik.nazwisko }}
+                            </p>
+
+                            <p class="text-muted mb-0">
+                                {{ formularz.opiekun_uczelniany.uzytkownik.email }}
+                            </p>
+
+                        {% else %}
+
+                            <p class="text-muted mb-0">
+                                Brak przypisanego opiekuna uczelnianego.
+                            </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================================================================================= -->
+        <!-- FIRMA -->
+        <!-- ================================================================================= -->
+
+        <div class="mb-5">
+
+            <h5 class="mb-3">Firma</h5>
+
+            <div class="border rounded p-3">
+
+                <h6 class="fw-bold mb-2">
+                    {{ formularz.firma.nazwa if formularz.firma else 'Brak firmy' }}
+                </h6>
+
+                <p class="text-muted mb-0">
+                    {{ formularz.firma.adres if formularz.firma else 'Brak adresu' }}
+                </p>
+
+            </div>
+
+        </div>
+
+        <!-- ================================================================================= -->
+        <!-- POSTĘP -->
+        <!-- ================================================================================= -->
+
+        <div class="mb-5">
+
+            <div class="d-flex justify-content-between align-items-center mb-2">
+
+                <h5 class="mb-0">Postęp praktyk</h5>
+
+                <span class="text-muted">
+                    {{ liczba_wpisow or 0 }} / {{ formularz.wpisy_wymagane or 120 }}
+                    wpisów
+                </span>
+
+            </div>
+
+            {% set percent = 0 %}
+
+            {% if formularz.wpisy_wymagane and formularz.wpisy_wymagane > 0 %}
+                {% set percent = (
+                    (liczba_wpisow or 0)
+                    / formularz.wpisy_wymagane
+                    * 100
+                ) | round(1) %}
+            {% endif %}
+
+            <div class="progress" style="height: 12px;">
+                <div class="progress-bar"
+                     role="progressbar"
+                     style="width: {{ percent }}%;">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================================================================================= -->
+        <!-- OCENY -->
+        <!-- ================================================================================= -->
+
+        <div class="mb-5">
+
+            <h5 class="mb-3">Oceny i opinie</h5>
+
+            <div class="row">
+
+                <div class="col-md-2 mb-3">
+                    <div class="border rounded p-3 text-center">
+                        <p class="small text-muted mb-1">Zakładowy</p>
+                        <h4>{{ formularz.ocena_opiekuna_zakladowego or '-' }}</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="border rounded p-3 text-center">
+                        <p class="small text-muted mb-1">Uczelniany</p>
+                        <h4>{{ formularz.ocena_opiekuna_uczelnianego or '-' }}</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="border rounded p-3 text-center">
+                        <p class="small text-muted mb-1">Sprawozdanie</p>
+                        <h4>{{ formularz.ocena_sprawozdanie or '-' }}</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-2 mb-3">
+                    <div class="border rounded p-3 text-center">
+                        <p class="small text-muted mb-1">Egzamin</p>
+                        <h4>{{ formularz.ocena_egzamin or '-' }}</h4>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <div class="border rounded p-3 text-center bg-light">
+                        <p class="small text-muted mb-1">Ocena końcowa</p>
+                        <h2>{{ formularz.ocena_koncowa or '-' }}</h2>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <h6>Opinia opiekuna zakładowego</h6>
+
+                        <p class="text-muted mb-0">
+                            {{ formularz.opinia_opiekuna_zakladowego or 'Brak opinii.' }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6 mb-3">
+
+                    <div class="border rounded p-3 h-100">
+
+                        <h6>Opinia opiekuna uczelnianego</h6>
+
+                        <p class="text-muted mb-0">
+                            {{ formularz.opinia_opiekuna_uczelnianego or 'Brak opinii.' }}
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ================================================================================= -->
+        <!-- EFEKTY UCZENIA -->
+        <!-- ================================================================================= -->
+
+        <div>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Efekty uczenia</h5>
+
+                <span class="text-muted small">
+                    {{ formularz.efekty_uczenia | length }} efektów
+                </span>
+            </div>
+
+            {% if formularz.efekty_uczenia %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Kod</th>
+                            <th>Opis</th>
+                            <th>Zakładowy</th>
+                            <th>Uczelniany</th>
+                            <th>Uwagi</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for efekt in formularz.efekty_uczenia %}
+
+                        <tr>
+
+                            <td>
+                                <span class="badge badge-secondary">
+                                    {{ efekt.efekt.kod }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {{ efekt.efekt.opis }}
+                            </td>
+
+                            <td>
+
+                                {% if efekt.czy_potwierdzony_zakladowy %}
+                                    <span class="text-success">✔ Potwierdzono</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if efekt.czy_potwierdzony_uczelniany %}
+                                    <span class="text-success">✔ Potwierdzono</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ efekt.uwagi or '—' }}
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+                <div class="alert alert-light border">
+                    Brak efektów uczenia.
+                </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,307 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h1 class="page-title mb-1">
+                Profil użytkownika
+            </h1>
+
+            <p class="text-muted mb-0">
+                Informacje o koncie użytkownika.
+            </p>
+        </div>
+
+        <!-- BUTTONS -->
+        {% if current_user.id == uzytkownik.id %}
+
+            {% if current_user.rola == 'student' %}
+                <a href="{{ url_for('student.edytuj_profil_uzytkownika') }}"
+                   class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i>
+                    Edytuj profil
+                </a>
+
+            {% elif current_user.rola == 'opiekun' %}
+                <a href="{{ url_for('opiekun.edytuj_profil_uzytkownika') }}"
+                   class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i>
+                    Edytuj profil
+                </a>
+
+            {% elif current_user.rola in ['admin', 'dziekanat'] %}
+                <a href="{{ url_for('admin.profil_uzytkownika_edytuj', uzytkownik_id=uzytkownik.id) }}"
+                   class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i>
+                    Edytuj profil
+                </a>
+            {% endif %}
+
+        {% endif %}
+
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="card mb-4">
+
+        <div class="card-header d-flex justify-content-between align-items-start">
+
+            <div>
+                <h2 class="card-title mb-1">
+                    {{ uzytkownik.imie }} {{ uzytkownik.nazwisko }}
+                </h2>
+
+                <p class="card-subtitle text-muted">
+                    {{ uzytkownik.rola|replace('_', ' ')|title }}
+                </p>
+            </div>
+
+            {% if uzytkownik.konto_aktywne %}
+                <span class="badge badge-success">
+                    Konto aktywne
+                </span>
+            {% else %}
+                <span class="badge badge-warning">
+                    Konto nieaktywne
+                </span>
+            {% endif %}
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Imię
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.imie }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Nazwisko
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.nazwisko }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Email
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.email }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Telefon
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.telefon or 'Brak danych' }}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Provider logowania
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.auth_provider or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Utworzono konto
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.utworzono.strftime('%d.%m.%Y') if uzytkownik.utworzono else 'Brak danych' }}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- STUDENT CARD -->
+    {% if uzytkownik.rola == 'student' %}
+
+    <div class="card mb-4">
+
+        <div class="card-header">
+            <h3 class="mb-0">
+                Informacje studenta
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Numer indeksu
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.student_profil.indeks or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Semestr
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.student_profil.semestr or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Kierunek
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.student_profil.kierunek or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Specjalność
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.student_profil.specjalnosc or 'Brak danych' }}
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Rok akademicki
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.student_profil.rok_akademicki or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Tryb studiów
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {% if uzytkownik.student_profil.czy_stacjonarne %}
+                            Stacjonarne
+                        {% else %}
+                            Niestacjonarne
+                        {% endif %}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    {% endif %}
+
+    <!-- OPIEKUN CARD -->
+    {% if uzytkownik.rola == 'opiekun' %}
+
+    <div class="card">
+
+        <div class="card-header">
+            <h3 class="mb-0">
+                Informacje opiekuna
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row">
+
+                <div class="col-md-6 col-xl-4 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Typ opiekuna
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.opiekun_profil.typ_opiekuna|title }}
+                    </p>
+                </div>
+
+                {% if uzytkownik.opiekun_profil.firma %}
+
+                <div class="col-md-6 col-xl-4 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Firma
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{ uzytkownik.opiekun_profil.firma.nazwa }}
+                    </p>
+
+                    <p class="text-muted mb-0">
+                        {{ uzytkownik.opiekun_profil.firma.adres }}
+                    </p>
+                </div>
+
+                {% endif %}
+
+                <div class="col-md-6 col-xl-4 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Liczba studentów
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {{
+                            (
+                                uzytkownik.opiekun_profil.podpieci_studenci_uczelnia|length
+                                +
+                                uzytkownik.opiekun_profil.podpieci_studenci_zaklad|length
+                            )
+                        }}
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,157 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h1 class="page-title mb-1">
+                Harmonogramy praktyk
+            </h1>
+
+            <p class="text-muted mb-0">
+                Wszystkie przesłane harmonogramy oczekujące na weryfikację.
+            </p>
+        </div>
+
+    </div>
+
+    {% if harmonogramy %}
+
+    <!-- GRID -->
+    <div class="row">
+
+        {% for harmonogram in harmonogramy %}
+
+        <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+
+            <div class="card shadow-sm border-0 h-100">
+
+                <div class="card-body d-flex flex-column">
+
+                    <!-- FIRMA -->
+                    <div class="mb-3">
+
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+
+                            <div>
+
+                                <h5 class="mb-1">
+                                    {{ harmonogram.firma.nazwa }}
+                                </h5>
+
+                                <p class="text-muted small mb-0">
+                                    {{ harmonogram.firma.adres or 'Brak adresu' }}
+                                </p>
+
+                            </div>
+
+                            {% if harmonogram.czy_zatwierdzony %}
+                                <span class="badge badge-success">
+                                    Zatwierdzony
+                                </span>
+                            {% else %}
+                                <span class="badge badge-warning">
+                                    Oczekuje
+                                </span>
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <!-- STUDENT -->
+                    <div class="mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Student
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.student.uzytkownik.imie }}
+                            {{ harmonogram.student.uzytkownik.nazwisko }}
+                        </p>
+                    </div>
+
+                    <!-- OPIEKUN -->
+                    <div class="mb-3">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Opiekun zakładowy
+                        </p>
+
+                        {% if harmonogram.opiekun_zakladowy.uzytkownik %}
+                            <p class="font-weight-bold mb-0">
+                                {{ harmonogram.opiekun_zakladowy.uzytkownik.imie }}
+                                {{ harmonogram.opiekun_zakladowy.uzytkownik.nazwisko }}
+                            </p>
+                        {% else %}
+                            <p class="text-muted mb-0">
+                                Brak opiekuna
+                            </p>
+                        {% endif %}
+
+                    </div>
+
+                    <!-- DATA -->
+                    <div class="mb-4">
+
+                        <p class="text-muted text-uppercase small mb-1">
+                            Data przesłania
+                        </p>
+
+                        <p class="font-weight-bold mb-0">
+                            {{ harmonogram.utworzono.strftime('%d.%m.%Y') if harmonogram.utworzono else 'Brak daty' }}
+                        </p>
+
+                    </div>
+
+                    <!-- ACTION -->
+                    <div class="mt-auto">
+
+                        <a
+                            href="{{ url_for('admin.harmonogram', harmonogram_id=harmonogram.id) }}"
+                            class="btn btn-primary btn-block">
+
+                            Szczegóły
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <!-- EMPTY -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body text-center py-5">
+
+            <h3 class="mb-2">
+                Brak harmonogramów
+            </h3>
+
+            <p class="text-muted mb-0">
+                Nie przesłano jeszcze żadnych harmonogramów praktyk.
+            </p>
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

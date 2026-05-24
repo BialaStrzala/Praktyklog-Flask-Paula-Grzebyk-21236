@@ -5,11 +5,11 @@
 
 {# ── Status colours ── #}
 {% set status_cfg = {
-    'oczekuje':     ('badge-warning',  'Oczekuje na zatwierdzenie', '⏳'),
-    'zaakceptowany':('badge-success',  'Zaakceptowany',             '✅'),
-    'odrzucony':    ('badge-danger',   'Odrzucony',                 '❌'),
+    'oczekuje':     ('badge-warning',  'Oczekuje na zatwierdzenie'),
+    'zaakceptowany':('badge-success',  'Zaakceptowany'),
+    'odrzucony':    ('badge-danger',   'Odrzucony'),
 } %}
-{% set s_class, s_label, s_icon = status_cfg.get(harmonogram.status, ('badge-neutral','Nieznany','?')) %}
+{% set s_class, s_label = status_cfg.get(harmonogram.status, ('badge-neutral','Nieznany','?')) %}
 
 {# ── Page header ── #}
 <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;">
@@ -23,7 +23,7 @@
         </span>
         {% if harmonogram.status == 'oczekuje' %}
             <a href="{{ url_for('student.edytuj_harmonogram', harmonogram_id=harmonogram.id) }}"
-               class="btn btn-secondary btn-sm">✏️ Edytuj</a>
+               class="btn btn-secondary btn-sm">Edytuj</a>
         {% endif %}
     </div>
 </div>
@@ -120,7 +120,7 @@
 <div style="display:flex;gap:10px;flex-wrap:wrap;">
     <a href="{{ url_for('student.dashboard') }}" class="btn btn-secondary btn-sm">← Powrót do dashboardu</a>
     {% if harmonogram.status == 'oczekuje' %}
-        <a href="{{ url_for('student.edytuj_harmonogram', harmonogram_id=harmonogram.id) }}" class="btn btn-primary btn-sm">✏️ Edytuj harmonogram</a>
+        <a href="{{ url_for('student.edytuj_harmonogram', harmonogram_id=harmonogram.id) }}" class="btn btn-primary btn-sm">Edytuj harmonogram</a>
     {% endif %}
 </div>
 {% endblock %}

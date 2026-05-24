@@ -12,13 +12,10 @@
                 <span class="username">{{ current_user.imie }} {{ current_user.nazwisko }}</span><span>({{ current_user.rola }})</span>
             {% endif %}
             {% if current_user.rola == 'student' %}
-                <a href="{{ url_for('student.profil_studenta') }}" class="btn">Profil</a>
+                <a href="{{ url_for('student.profil_uzytkownika') }}" class="btn">Profil</a>
             {% endif %}
-            {% if current_user.rola == 'opiekun_zakladowy' %}
-                <a href="{{ url_for('opiekun.dashboard') }}" class="btn">Dashboard</a>
-            {% endif %}
-            {% if current_user.rola == 'opiekun_uczelniany' %}
-                <a href="{{ url_for('opiekun.dashboard') }}" class="btn">Dashboard</a>
+            {% if current_user.rola == 'opiekun' %}
+                <a href="{{ url_for('opiekun.profil_uzytkownika') }}" class="btn">Profil</a>
             {% endif %}
             {% if current_user.rola == 'dziekanat' %}
                 <a href="{{ url_for('dziekanat.dashboard') }}" class="btn">Dashboard</a>

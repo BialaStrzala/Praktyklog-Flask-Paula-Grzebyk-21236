@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Lista Studentów
+{% endblock %}
+
+{% block pagecontent %}
+<div>
+    <h1>Wszyscy Studenci</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Imię i Nazwisko</th>
+                <th>Email</th>
+                <th>Profil</th>
+                <th>Dziennik</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in studenci %}
+            <tr>
+                <td>{{ student.imie }} {{ student.nazwisko }}</td>
+                <td>{{ student.email }}</td>
+                <td>
+                    <a class="btn btn-secondary" href="{{ url_for('opiekun.profil_studenta', uzytkownik_id=student.id) }}">Profil</a>
+                </td>
+                <td>
+                    <a class="btn btn-secondary" href="{{ url_for('opiekun.dziennik', student_id=student.id) }}">Dziennik</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

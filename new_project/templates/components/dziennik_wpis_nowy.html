@@ -1,0 +1,146 @@
+<div class="card shadow-sm border-0">
+
+    <div class="card-body p-4">
+
+        <!-- HEADER -->
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+
+            <div>
+                <h3 class="mb-1">
+                    Dodaj wpis do dziennika
+                </h3>
+
+                <p class="text-muted mb-0">
+                    Wprowadź informacje o wykonanych pracach.
+                </p>
+            </div>
+
+            <div class="text-md-right">
+
+                <div class="fw-bold">
+                    Dni robocze:
+                    {{ total_working_days }}
+                </div>
+
+                <div class="text-muted small">
+                    Łączna liczba godzin:
+                    {{ total_hours_worked }}
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FORM -->
+        <form
+            method="POST"
+            action="{{ url_for('student.dziennik') }}">
+
+            <input type="hidden" name="action" value="add">
+
+            <div class="row">
+
+                <!-- DATE -->
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="date"
+                        class="form-label">
+
+                        Data
+                    </label>
+
+                    <input
+                        type="date"
+                        id="date"
+                        name="date"
+                        class="form-control"
+                        required>
+
+                </div>
+
+                <!-- HOURS -->
+                <div class="col-md-6 mb-3">
+
+                    <label
+                        for="hours_worked"
+                        class="form-label">
+
+                        Liczba godzin
+                    </label>
+
+                    <input
+                        type="number"
+                        step="0.5"
+                        id="hours_worked"
+                        name="hours_worked"
+                        class="form-control"
+                        placeholder="np. 7.5">
+
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="col-12 mb-4">
+
+                    <label
+                        for="description"
+                        class="form-label">
+
+                        Opis wykonywanych prac
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        class="form-control"
+                        rows="2"
+                        required></textarea>
+
+                </div>
+
+                <!-- EFFECTS -->
+                <div class="col-12 mb-4">
+
+                    <label
+                        for="effect_ids"
+                        class="form-label">
+
+                        Efekty nauki
+                    </label>
+
+                    <select
+                        id="effect_ids"
+                        name="effect_ids[]"
+                        class="form-control"
+                        multiple
+                        size="4">
+
+                        {% for efekt in efekty_uczenia_all %}
+                            <option value="{{ efekt.id }}">
+                                {{ efekt.kod }} — {{ efekt.opis }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                    <small class="text-muted">
+                        Przytrzymaj CTRL aby zaznaczyć wiele efektów.
+                    </small>
+
+                </div>
+
+            </div>
+
+            <!-- SUBMIT -->
+            <button
+                type="submit"
+                class="btn btn-primary btn-lg w-100">
+
+                Dodaj wpis
+            </button>
+
+        </form>
+
+    </div>
+
+</div>

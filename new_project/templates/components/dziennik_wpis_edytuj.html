@@ -1,0 +1,229 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h1 class="page-title mb-1">
+                Edytuj wpis
+            </h1>
+
+            <p class="text-muted mb-0">
+                Zaktualizuj dane wpisu w dzienniku praktyk.
+            </p>
+        </div>
+
+        <a
+            href="{{ url_for('student.dziennik') }}"
+            class="btn btn-outline-secondary">
+
+            Powrót
+        </a>
+
+    </div>
+
+    <!-- CARD -->
+    <div class="card shadow-sm border-0">
+
+        <!-- HEADER -->
+        <div class="card-header bg-white border-bottom-0 py-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <div>
+
+                    <h3 class="mb-1">
+                        Wpis #{{ log.nr_dnia }}
+                    </h3>
+
+                    <p class="text-muted mb-0">
+
+                        Utworzono:
+                        {{ log.utworzono.strftime('%d.%m.%Y %H:%M') if log.utworzono else 'Brak daty' }}
+
+                    </p>
+
+                </div>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                    {% if log.status == 'zatwierdzony' %}
+                        <span class="badge badge-success">
+                            Zatwierdzony
+                        </span>
+                    {% elif log.status == 'odrzucony' %}
+                        <span class="badge badge-danger">Odrzucony</span>
+                    {% else %}
+                        <span class="badge badge-warning">
+                            Oczekuje
+                        </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- BODY -->
+        <div class="card-body">
+
+            <form
+                id="main-edit-form"
+                method="POST"
+                action="{{ url_for('student.dziennik_wpis_edytuj', wpis_id=log.id) }}">
+
+                <div class="row">
+
+                    <!-- DATA -->
+                    <div class="col-lg-4 mb-3">
+
+                        <label class="form-label">
+                            Data
+                        </label>
+
+                        <input
+                            type="date"
+                            class="form-control"
+                            name="date"
+                            value="{{ log.data.isoformat() if log.data else '' }}"
+                            required>
+
+                    </div>
+
+                    <!-- GODZINY -->
+                    <div class="col-lg-4 mb-3">
+
+                        <label class="form-label">
+                            Liczba godzin
+                        </label>
+
+                        <input
+                            type="number"
+                            step="0.5"
+                            class="form-control"
+                            name="hours_worked"
+                            value="{{ log.liczba_godzin }}"
+                            required>
+
+                    </div>
+
+                    <!-- STATUS -->
+                    <div class="col-lg-4 mb-3">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            value="{% if log.status == 'zatwierdzony' %}Zatwierdzony{% else %}Oczekuje{% endif %}"
+                            disabled>
+
+                    </div>
+
+                    <!-- OPIS -->
+                    <div class="col-12 mb-4">
+
+                        <label class="form-label">
+                            Opis wykonywanych prac
+                        </label>
+
+                        <textarea
+                            name="description"
+                            class="form-control"
+                            rows="10"
+                            required>{{ log.opis }}</textarea>
+
+                    </div>
+
+                    <!-- EFEKTY -->
+                    <div class="col-12">
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+
+                            <div>
+
+                                <label class="form-label mb-1">
+                                    Efekty nauki
+                                </label>
+
+                                <select
+                                    id="effect_ids"
+                                    name="effect_ids[]"
+                                    class="form-control"
+                                    multiple
+                                    size="13">
+
+                                    {% for efekt in efekty_uczenia_all %}
+                                        <option value="{{ efekt.id }}" {% if efekt.id in selected_effect_ids %}selected{% endif %}>
+                                            {{ efekt.kod }} — {{ efekt.opis }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
+
+                    <button
+                        type="button"
+                        class="btn btn-outline-danger"
+                        onclick="deleteLog({{ log.id }})">
+
+                        Usuń wpis
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-success">
+
+                        Zapisz zmiany
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- DELETE -->
+<form
+    id="delete-form-{{ log.id }}"
+    method="POST"
+    action="{{ url_for('student.dziennik_usun', wpis_id=log.id) }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+
+function deleteLog(logId) {
+
+    if (confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+
+        document.getElementById('delete-form-' + logId).submit();
+
+    }
+
+}
+
+</script>
+
+{% endblock %}

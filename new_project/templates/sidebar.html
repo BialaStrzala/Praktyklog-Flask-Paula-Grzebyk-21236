@@ -3,16 +3,19 @@
         {% if current_user.rola == 'student' %}
             <li><a href="{{ url_for('student.dashboard') }}">Dashboard</a></li>
             <li><a href="{{ url_for('student.dziennik') }}">Dziennik</a></li>
+            <li><a href="{{ url_for('student.formularz') }}">Moje praktyki</a></li>
             <li><a href="{{ url_for('student.moj_harmonogram') }}">Harmonogram</a></li>
         {% endif %}
 
-        {% if current_user.rola == 'opiekun_zakladowy' or current_user.rola == 'opiekun_uczelniany' %}
+        {% if current_user.rola == 'opiekun'%}
             <li><a href="{{ url_for('opiekun.dashboard') }}">Dashboard</a></li>
-            <li><a href="#">Moi studenci</a></li>
+            <li><a href="{{ url_for('opiekun.formularze') }}">Formularze</a></li>
+            <li><a href="{{ url_for('opiekun.lista_studentow') }}">Moi Studenci</a></li>
         {% endif %}
 
         {% if current_user.rola == 'admin' %}
             <li><a href="{{ url_for('admin.dashboard') }}">Panel Administratora</a></li>
+            <li><a href="{{ url_for('admin.harmonogramy') }}">Harmonogramy</a></li>
             <li><a href="{{ url_for('admin.uzytkownicy') }}">Użytkownicy</a></li>
         {% endif %}
     </ul>

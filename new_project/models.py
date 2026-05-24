@@ -18,7 +18,7 @@ class Uzytkownik(db.Model, UserMixin):
     nazwisko = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     #haslo_hash = db.Column(db.String(256), nullable=False)
-    rola = db.Column(db.String(50), nullable=False)  # 'student', 'opiekun_zakladowy', 'opiekun_uczelniany', 'dziekanat', 'admin'
+    rola = db.Column(db.String(50), nullable=False)  # 'student', 'opiekun', 'dziekanat', 'admin'
     konto_aktywne = db.Column(db.Boolean, default=True)
     telefon = db.Column(db.String(20), nullable=True)
     utworzono = db.Column(db.DateTime, default=datetime.now)
@@ -109,7 +109,7 @@ class FormularzPraktyk(db.Model):
     opiekun_uczelniany_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=True)
     opiekun_zakladowy_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=True)
     firma_id = db.Column(db.Integer, db.ForeignKey('firma.id'), nullable=True)
-    harmonogram_praktyk = db.Column(db.Integer, db.ForeignKey('harmonogram_praktyk.id'), nullable=True)
+    harmonogram_praktyk_id = db.Column(db.Integer, db.ForeignKey('harmonogram_praktyk.id'), nullable=True)
 
     data_rozpoczecia = db.Column(db.Date, nullable=True)
     data_zakonczenia = db.Column(db.Date, nullable=True)
@@ -128,7 +128,10 @@ class FormularzPraktyk(db.Model):
     utworzono = db.Column(db.DateTime, default=datetime.now)
     zaktualizowano = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
+    harmonogram = db.relationship('HarmonogramPraktyk', backref='harmonogram_praktyk', lazy=True)
     efekty_uczenia = db.relationship('EfektUczeniaFormularz', backref='formularz_praktyk', lazy=True)
+    opiekun_uczelniany = db.relationship('OpiekunProfil', foreign_keys=[opiekun_uczelniany_id], lazy=True)
+    opiekun_zakladowy = db.relationship('OpiekunProfil', foreign_keys=[opiekun_zakladowy_id], lazy=True)
 
 
 # === EFEKTY UCZENIA – POWIĄZANIE Z FORMULARZEM ===
@@ -154,6 +157,7 @@ class HarmonogramPraktyk(db.Model):
     opiekun_zakladowy_id = db.Column(db.Integer, db.ForeignKey('opiekun_profil.id'), nullable=False)
     firma_id = db.Column(db.Integer, db.ForeignKey('firma.id'), nullable=True)
 
+    student = db.relationship('StudentProfil', foreign_keys=[student_id], lazy=True)
     opiekun_zakladowy = db.relationship('OpiekunProfil', foreign_keys=[opiekun_zakladowy_id], lazy=True)
     firma = db.relationship('Firma', foreign_keys=[firma_id], lazy=True)
 
@@ -163,6 +167,7 @@ class HarmonogramPraktyk(db.Model):
     
     status = db.Column(db.String(50), nullable=False, default="oczekuje") #oczekuje, zaakceptowany, odrzucony
     powod_odrzucenia = db.Column(db.String(500), nullable=True)
+    utworzono = db.Column(db.DateTime, default=datetime.now)
 
     efekty_harmonogramu = db.relationship('EfektUczeniaHarmonogram', backref='harmonogram', lazy=True)
 
@@ -190,8 +195,23 @@ class DziennikWpis(db.Model):
     liczba_godzin = db.Column(db.Float, nullable=False)
     opis = db.Column(db.Text, nullable=False)
 
-    czy_zatwierdzony = db.Column(db.Boolean, nullable=True, default=False)
+    #czy_zatwierdzony = db.Column(db.Boolean, nullable=True, default=False)
+    status = db.Column(db.String(20), nullable=False, default='w_trakcie') #w_trakcie, zatwierdzony, odrzucony
     powod_odrzucenia = db.Column(db.Text, nullable=True)
 
     utworzono = db.Column(db.DateTime, default=datetime.now)
     zaktualizowano = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
+
+    efekty = db.relationship('DziennikEfekt', backref='wpis', lazy=True, cascade='all, delete-orphan')
+
+
+# === DZIENNIK PRAKTYK – EFEKT UCZENIA WPISU ===
+class DziennikEfekt(db.Model):
+    __tablename__ = 'dziennik_efekt'
+
+    id = db.Column(db.Integer, primary_key=True)
+    dziennik_wpis_id = db.Column(db.Integer, db.ForeignKey('dziennik_wpis.id'), nullable=False)
+    efekt_uczenia_id = db.Column(db.Integer, db.ForeignKey('efekt_uczenia.id'), nullable=False)
+    #jeden wpis moze miec wiele efektow
+
+    efekt_uczenia = db.relationship('EfektUczenia', lazy=True)

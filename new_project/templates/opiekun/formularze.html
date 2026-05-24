@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}
+Praktyki Studentów 
+{% endblock %}
+
+{% block pagecontent %}
+<h1>Praktyki moich studentów</h1>
+{% for formularz in formularze_praktyk %}
+    {% include 'components/formularze_praktyk_grid.html' %}
+{% endfor %}
+{% if not formularze_praktyk %}
+    <p>Brak formularzy praktyk do wyświetlenia.</p>
+{% endif %}
+
+{% endblock %}

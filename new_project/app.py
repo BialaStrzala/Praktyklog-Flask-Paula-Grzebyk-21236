@@ -5,12 +5,14 @@ from flask_login import LoginManager
 from authlib.integrations.flask_client import OAuth
 from dotenv import load_dotenv
 from models import db, Uzytkownik
+from flasgger import Swagger
 
 load_dotenv()
 app = Flask(__name__)
 
+
 # === DB ===
-app.config['SECRET_KEY'] = os.getenv("SECRET_KEY"),
+app.config['SECRET_KEY'] = os.getenv("SECRET_KEY")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///internships.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -22,6 +24,7 @@ oauth = OAuth(app)
 @login_manager.user_loader
 def load_user(uzytkownik_id):
     return Uzytkownik.query.get(int(uzytkownik_id))
+
 
 # === MSFT ===
 microsoft = oauth.register(
@@ -42,6 +45,43 @@ microsoft = oauth.register(
     }
 )
 
+
+# === SWAGGER ===
+swagger_template = {
+    "info": {
+        "title":       "Praktyklog API",
+        "description": "REST API systemu rozliczania praktyk studenckich.",
+        "version":     "1.0.0",
+    },
+    "securityDefinitions": {
+        "cookieAuth": {
+            "type": "apiKey",
+            "in":   "cookie",
+            "name": "session",
+        }
+    },
+}
+swagger_config = {
+    "headers": [],
+    "specs": [
+        {
+            "endpoint": "apispec",
+            "route": "/apispec.json",
+            "rule_filter": lambda rule: True,
+            "model_filter": lambda tag: True,
+        }
+    ],
+    "static_url_path": "/flasgger_static",
+    "swagger_ui": True,
+    "specs_route": "/apidocs/"
+}
+
+swagger = Swagger(
+    app,
+    template=swagger_template,
+    config=swagger_config
+)
+
 # === ROUTES ===
 from routes.auth import auth_bp
 from routes.student import student_bp
@@ -54,6 +94,16 @@ app.register_blueprint(student_bp, url_prefix='/student')
 app.register_blueprint(opiekun_bp, url_prefix='/opiekun')
 app.register_blueprint(dziekanat_bp, url_prefix='/dziekanat')
 app.register_blueprint(admin_bp, url_prefix='/admin')
+
+
+# === API ===
+from api.student import student_api_bp
+from api.harmonogram import harmonogram_api_bp
+from api.formularz import formularz_api_bp
+
+app.register_blueprint(student_api_bp)
+app.register_blueprint(harmonogram_api_bp)
+app.register_blueprint(formularz_api_bp)
 
 
 # === MAIN ===

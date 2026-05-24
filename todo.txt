@@ -1,0 +1,18 @@
+student
+- harmonogram (wyswietla/dodaje/edytuje/usuwa) - OK
+- formularz (wyswietla) - OK
+- dziennik (wyswietla/dodaje/edytuje/usuwa) - OK
+- wlasny profil (wyswietla/edytuje) - OK
+
+admin/dziekanat
+- zatwierdza harmonogramy (dodaje opiekunow) -> auto +formularz - OK
+- wyswietla liste uzytkownikow
+- wlsany profil (wyswietla/edytuje)
+
+opiekun
+- formularz studenta (wyswietla) - OK
+- dziennik studenta (wyswietla/zatwierdza) - OK, edycja
+- profil studenta (wyswietla) - OK
+- wlasny profil (wyswietla/edytuje) - OK
+
+change profil -> current_user_profil

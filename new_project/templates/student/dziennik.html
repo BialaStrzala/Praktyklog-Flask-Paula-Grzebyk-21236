@@ -1,70 +1,287 @@
 {% extends 'layout.html' %}
 
 {% block pagetitle %}
-Dziennik Praktyk
+Dziennik praktyk
 {% endblock %}
 
 {% block pagecontent %}
-<div>
-    <h1>Dziennik praktyk</h1>
-    <h2>Dodaj wpis</h2>
-    <form method="POST">
-        <label>Data:</label>
-        <input type="date" name="date" required><br>
-        <label>Opis:</label>
-        <textarea name="description" required></textarea><br>
-        <label>Liczba godzin:</label>
-        <input type="number" step="0.5" name="hours_worked"><br>
-        <button type="submit">Dodaj</button>
-    </form>
 
-    <h2>Dziennik</h2>
-    <p>Liczba dni roboczych: {{ total_working_days }}</p>
-    <p>Liczba przepracowanych godzin: {{ total_hours_worked }}</p>
-    <form method="POST" action="{{ url_for('student.dziennik_edytuj') }}">
-    <table>
-        <thead>
-            <tr>
-                <td>L.p.</td>
-                <td>Data</td>
-                <td>Opis</td>
-                <td>Ilość godzin</td>
-                <td>Podpis opiekuna</td>
-                <td>Akcje</td>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ loop.index }}</td>
-                <input type="hidden" name="log_id[]" value="{{ log.id }}">
+<div class="container-fluid">
 
-                <td><input type="date" name="date[]" value="{{ log.date }}"></td>
-                <td><input type="text" name="description[]" value="{{ log.description }}"></td>
-                <td><input type="text" name="hours_worked[]" value="{{ log.hours_worked }}"></td>
-                <td>{{ 'Tak' if log.workplace_supervisor_signed else '-' }}</td>
-                <td><button type="button" onclick="deleteLog({{ log.id }})">Usuń</button></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <button type="submit">Zapisz wszystkie zmiany</button>
-    </form>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h1 class="page-title mb-1">
+                Dziennik praktyk
+            </h1>
+
+            <p class="text-muted mb-0">
+                Zarządzaj wpisami praktyk zawodowych.
+            </p>
+        </div>
+
+    </div>
+    {% if formularz %}
+
+    <!-- ADD NEW ENTRY -->
+    <div class="mb-4">
+
+        <button
+            class="btn btn-primary btn-lg w-100"
+            type="button"
+            data-toggle="collapse"
+            data-target="#nowywpis"
+            aria-expanded="false"
+            aria-controls="nowywpis">
+
+            + Dodaj nowy wpis
+        </button>
+
+        <div class="collapse mt-3" id="nowywpis">
+            {% include 'components/dziennik_wpis_nowy.html' %}
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="card shadow-sm border-0">
+
+        <!-- Header -->
+        <div class="card-header bg-white border-bottom-0 py-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+                <div>
+                    <h3 class="mb-1">
+                        Wszystkie wpisy
+                    </h3>
+
+                    <p class="text-muted mb-0">
+                        Lista wszystkich wpisów w dzienniku praktyk.
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Body -->
+        <div class="card-body p-0">
+
+            {% if logs %}
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="thead-light">
+
+                        <tr>
+                            <th class="px-4 py-3">
+                                Nr dnia
+                            </th>
+
+                            <th class="py-3">
+                                Data
+                            </th>
+
+                            <th class="py-3">
+                                Liczba godzin
+                            </th>
+
+                            <th class="py-3">
+                                Opis
+                            </th>
+
+                            <th class="py-3">
+                                Efekty nauki
+                            </th>
+
+                            <th class="py-3">
+                                Podpis
+                            </th>
+
+                            <th class="text-right pr-4 py-3">
+                                Akcje
+                            </th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for log in logs %}
+
+                        <tr>
+
+                            <!-- NR DNIA -->
+                            <td class="px-4 font-weight-bold">
+                                {{ log.nr_dnia }}
+                            </td>
+
+                            <!-- DATA -->
+                            <td>
+                                {{ log.data.strftime('%d.%m.%Y') if log.data else '-' }}
+                            </td>
+
+                            <!-- GODZINY -->
+                            <td>
+                                {{ log.liczba_godzin }} h
+                            </td>
+
+                            <!-- OPIS -->
+                            <td style="min-width:320px;max-width:500px;">
+
+                                <div class="text-wrap">
+
+                                    {{ log.opis[:180] }}
+
+                                    {% if log.opis|length > 180 %}
+                                        ...
+                                    {% endif %}
+
+                                </div>
+
+                            </td>
+
+                            <!-- EFEKTY -->
+                            <td style="min-width:180px;">
+
+                                {% if log.efekty %}
+
+                                    <div class="d-flex flex-wrap gap-1">
+
+                                        {% for efekt in log.efekty %}
+
+                                        <span class="badge badge-primary">
+
+                                            {{ efekt.efekt_uczenia.kod }}
+
+                                        </span>
+
+                                        {% endfor %}
+
+                                    </div>
+
+                                {% else %}
+
+                                    <span class="text-muted">
+                                        Brak
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <!-- PODPIS -->
+                            <td>
+
+                                {% if log.status == 'zatwierdzony' %}
+                                    <span class="badge badge-success">
+                                        Zatwierdzony
+                                    </span>
+                                {% endif %}
+                                {% if log.status == 'odrzucony' %}
+                                    <span class="badge badge-danger">Odrzucony</span>
+                                {% else %}
+                                    <span class="badge badge-warning">
+                                        Oczekuje
+                                    </span>
+                                {% endif %}
+
+                            </td>
+
+                            <!-- AKCJE -->
+                            <td class="text-right pr-4">
+
+                                <div class="d-flex justify-content-end flex-wrap gap-2">
+
+                                    <a
+                                        href="{{ url_for('student.dziennik_wpis_edytuj', wpis_id=log.id) }}"
+                                        class="btn btn-outline-primary btn-sm">
+
+                                        Edytuj
+                                    </a>
+
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-danger btn-sm"
+                                        onclick="deleteLog({{ log.id }})">
+
+                                        Usuń
+                                    </button>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <!-- EMPTY STATE -->
+            <div class="text-center py-5">
+
+                <h4 class="mb-2">
+                    Brak wpisów
+                </h4>
+
+                <p class="text-muted mb-4">
+                    Nie dodano jeszcze żadnych wpisów do dziennika praktyk.
+                </p>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- DELETE FORMS -->
     {% for log in logs %}
-    <form id="delete-form-{{ log.id }}"
+
+    <form
+        id="delete-form-{{ log.id }}"
         method="POST"
-        action="{{ url_for('student.dziennik_usun', log_id=log.id) }}">
+        action="{{ url_for('student.dziennik_usun', wpis_id=log.id) }}">
+
     </form>
+
     {% endfor %}
+
+    {% else %}
+        <p>Nie masz jeszcze zaakceptowanych praktyk.</p>
+        <a class="btn btn-primary" href="{{ url_for('student.moj_harmonogram') }}">Przejdź do harmonogramu</a>
+    {% endif %}
+
 </div>
+
 {% endblock %}
 
 {% block scripts %}
+
 <script>
-    function deleteLog(logId) {
-        if(confirm("Czy na pewno chcesz usunąć ten wpis?")) {
-            document.getElementById("delete-form-" + logId).submit();
-        }
+
+function deleteLog(logId) {
+
+    if (confirm('Czy na pewno chcesz usunąć ten wpis?')) {
+
+        document.getElementById('delete-form-' + logId).submit();
+
     }
+
+}
+
 </script>
+
 {% endblock %}

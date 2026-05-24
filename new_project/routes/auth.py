@@ -13,7 +13,7 @@ auth_bp = Blueprint('auth', __name__)
 def redirect_based_on_role(user):
     if user.rola == 'student':
         return redirect(url_for('student.dashboard'))
-    elif user.rola == 'opiekun_zakladowy' or user.rola == 'opiekun_uczelniany':
+    elif user.rola == 'opiekun':
         return redirect(url_for('opiekun.dashboard'))
     elif user.rola == 'dziekanat':
         return redirect(url_for('dziekanat.dashboard'))

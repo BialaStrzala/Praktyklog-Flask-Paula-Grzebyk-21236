@@ -1,0 +1,285 @@
+{% if formularz %}
+
+<div class="card">
+
+    <!-- HEADER -->
+    <div class="card-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+
+        <div>
+
+            <p class="card-title mb-1">
+                {{ formularz.firma.nazwa or 'Brak nazwy firmy' }}
+            </p>
+
+            <p class="card-subtitle text-muted small">
+                Formularz · Dodany {{ formularz.utworzono_formatted or 'Brak daty' }}
+            </p>
+
+        </div>
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+
+            {% set status_map = {
+                'w_trakcie': ('W trakcie','badge badge-warning'),
+                'zakonczone': ('Zakończone','badge badge-success'),
+                'porzucone': ('Porzucone','badge badge-danger')
+            } %}
+
+            {% set status_label, status_class = status_map.get(
+                formularz.status,
+                (formularz.status or 'W toku','badge badge-secondary')
+            ) %}
+
+            <span class="{{ status_class }}">
+                {{ status_label }}
+            </span>
+
+            {% if current_user.rola == 'opiekun' %}
+            <span class="badge badge-primary">
+                {{ formularz.wpisy_do_zatwierdzenia or 0 }} do zatwierdzenia
+            </span>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <!-- BODY -->
+    <div class="card-body">
+
+        <div class="row mb-3">
+
+            <!-- STUDENT -->
+            {% if current_user.rola == 'opiekun' %}
+
+            <div class="col-sm-6 col-md-3">
+
+                <p class="text-muted small text-uppercase mb-1">
+                    Student
+                </p>
+
+                <p class="font-weight-bold mb-0">
+                    {{ formularz.student.uzytkownik.imie }}
+                    {{ formularz.student.uzytkownik.nazwisko }}
+                </p>
+
+                <p class="text-muted small mb-0">
+                    {{ formularz.student.indeks }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+            <!-- FIRMA -->
+            <div class="col-sm-6 col-md-3">
+
+                <p class="text-muted small text-uppercase mb-1">
+                    Firma
+                </p>
+
+                <p class="font-weight-bold mb-0">
+                    {{ formularz.firma.nazwa or 'Brak nazwy firmy' }}
+                </p>
+
+                <p class="text-muted small mb-0">
+                    {{ formularz.firma.adres or 'Brak adresu' }}
+                </p>
+
+            </div>
+
+            <!-- OPIEKUN ZAKLADOWY -->
+            {% if not (
+                current_user.rola == 'opiekun'
+                and current_user.opiekun_profil.typ_opiekuna == 'zakladowy'
+            ) %}
+
+            <div class="col-sm-6 col-md-3">
+
+                <p class="text-muted small text-uppercase mb-1">
+                    Opiekun zakładowy
+                </p>
+
+                <p class="font-weight-bold mb-0">
+                    {{ formularz.opiekun_zakladowy_user.imie ~ ' ' ~ formularz.opiekun_zakladowy_user.nazwisko if formularz.opiekun_zakladowy_user else 'Brak' }}
+                </p>
+
+                <p class="text-muted small mb-0">
+                    {{ formularz.opiekun_zakladowy_user.email if formularz.opiekun_zakladowy_user else 'Brak' }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+            <!-- OPIEKUN UCZELNIANY -->
+            {% if not (
+                current_user.rola == 'opiekun'
+                and current_user.opiekun_profil.typ_opiekuna == 'uczelniany'
+            ) %}
+
+            <div class="col-sm-6 col-md-3">
+
+                <p class="text-muted small text-uppercase mb-1">
+                    Opiekun uczelniany
+                </p>
+
+                <p class="font-weight-bold mb-0">
+                    {{ formularz.opiekun_uczelniany_user.imie ~ ' ' ~ formularz.opiekun_uczelniany_user.nazwisko if formularz.opiekun_uczelniany_user else 'Brak' }}
+                </p>
+
+                <p class="text-muted small mb-0">
+                    {{ formularz.opiekun_uczelniany_user.email if formularz.opiekun_uczelniany_user else 'Brak' }}
+                </p>
+
+            </div>
+
+            {% endif %}
+
+            <!-- OKRES -->
+            <div class="col-sm-6 col-md-3">
+
+                <p class="text-muted small text-uppercase mb-1">
+                    Okres praktyk
+                </p>
+
+                <p class="font-weight-bold mb-0">
+                    {{ formularz.data_start_formatted or 'Brak' }}
+                    –
+                    {{ formularz.data_end_formatted or 'Brak' }}
+                </p>
+
+                <p class="text-muted small mb-0">
+                    {{ formularz.planowana_liczba_dni or 'Brak' }}
+                    dni roboczych
+                </p>
+
+                {% if formularz.days_remaining is not none %}
+                <p class="text-muted small mb-0">
+                    Pozostało dni:
+                    <strong>{{ formularz.days_remaining }}</strong>
+                </p>
+                {% endif %}
+
+            </div>
+
+        </div>
+
+        <!-- PROGRESS -->
+        <div class="d-flex justify-content-between align-items-center mb-2">
+
+            <p class="text-uppercase small text-muted mb-0">
+                Postęp
+            </p>
+
+            <p
+                class="small text-muted mb-0"
+                style="font-family: 'DM Mono', monospace;">
+
+                {{ formularz.wpisy_zatwierdzone or 0 }}
+                /
+                {{ formularz.wpisy_wymagane or 0 }}
+                wpisów
+
+            </p>
+
+        </div>
+
+        <div class="progress mb-3" style="height:10px;">
+
+            {% set percent = 0 %}
+
+            {% if formularz.wpisy_wymagane and formularz.wpisy_wymagane > 0 %}
+                {% set percent = (
+                    (
+                        formularz.wpisy_zatwierdzone or 0
+                    ) / formularz.wpisy_wymagane * 100
+                ) | round(1) %}
+            {% endif %}
+
+            <div
+                class="progress-bar"
+                role="progressbar"
+                style="width: {{ percent }}%;"
+                aria-valuenow="{{ percent }}"
+                aria-valuemin="0"
+                aria-valuemax="100">
+
+            </div>
+
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="d-flex gap-2 flex-wrap">
+
+            {% if current_user.rola == 'student' %}
+
+            <a
+                href="{{ url_for('student.dziennik') }}"
+                class="btn btn-primary btn-sm">
+
+                Otwórz dziennik
+
+            </a>
+
+            <a
+                href="{{ url_for('student.formularz') }}"
+                class="btn btn-secondary btn-sm">
+
+                Szczegóły formularza
+
+            </a>
+
+            {% elif current_user.rola == 'opiekun' %}
+
+            <a
+                href="{{ url_for('opiekun.dziennik', student_id=formularz.student_id) }}"
+                class="btn btn-primary btn-sm">
+
+                Otwórz dziennik
+
+            </a>
+
+            <a
+                href="{{ url_for('opiekun.formularz', formularz_id=formularz.id) }}"
+                class="btn btn-secondary btn-sm">
+
+                Szczegóły formularza
+
+            </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% else %}
+
+<div class="card text-center p-5">
+
+    <h3 class="mb-2">
+        Brak formularzy praktyk
+    </h3>
+
+    <p class="text-muted small mb-4">
+        Brak formularzy praktyk.
+    </p>
+
+    {% if current_user.rola == 'student' %}
+
+    <a
+        href="{{ url_for('student.nowy_harmonogram') }}"
+        class="btn btn-primary">
+
+        Wyślij nowy harmonogram
+
+    </a>
+
+    {% endif %}
+
+</div>
+
+{% endif %}

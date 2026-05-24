@@ -18,8 +18,252 @@ def role_required(rola):
         return decorated_function
     return decorator
 
+def get_profile():
+    if current_user.rola == 'student':
+        profil = models.StudentProfil.query.filter_by(uzytkownik_id=current_user.id).first_or_404()
+    if current_user.rola == 'opiekun':
+        profil = models.OpiekunProfil.query.filter_by(uzytkownik_id=current_user.id).first_or_404()
+    return profil
+
+
+# ============================================================================
+# === DASHBOARD ===
+# ============================================================================
 
 @opiekun_bp.route('/dashboard')
 @role_required('opiekun')
 def dashboard():
-    return 'Opiekun'
+    return render_template('opiekun/dashboard.html')
+
+
+# ============================================================================
+# === DZIENNIK ===
+# ============================================================================
+
+# === WSZYSTKIE FORMULARZE ===
+@opiekun_bp.route('/formularze', methods=['GET'])
+@role_required('opiekun')
+def formularze():
+    current_user_profile = models.OpiekunProfil.query.filter_by(
+        uzytkownik_id=current_user.id
+    ).first()
+
+    if current_user_profile.typ_opiekuna == 'zakladowy':
+        formularze_praktyk = models.FormularzPraktyk.query.filter_by(
+            opiekun_zakladowy_id=current_user_profile.id
+        ).order_by(
+            models.FormularzPraktyk.utworzono.desc()
+        ).all()
+    else:
+        formularze_praktyk = models.FormularzPraktyk.query.filter_by(
+            opiekun_uczelniany_id=current_user_profile.id
+        ).order_by(
+            models.FormularzPraktyk.utworzono.desc()
+        ).all()
+
+    return render_template(
+        'opiekun/formularze.html',
+        formularze_praktyk=formularze_praktyk
+    )
+
+
+# === WYSWIETL DZIENNIK ===
+@opiekun_bp.route('/dziennik/<int:student_id>', methods=['GET'])
+@role_required('opiekun')
+def dziennik(student_id):
+
+    logs = models.DziennikWpis.query.filter_by(
+        student_id=student_id
+    ).order_by(
+        models.DziennikWpis.nr_dnia.asc()
+    ).all()
+
+    formularz = models.FormularzPraktyk.query.filter_by(
+        student_id=student_id,
+        status='w_trakcie'
+    ).first()
+
+    student = models.StudentProfil.query.filter_by(
+        id=student_id
+    ).first()
+
+    return render_template(
+        'opiekun/dziennik.html',
+        logs=logs,
+        formularz=formularz,
+        student=student
+    )
+
+
+# === ZATWIERDZ WSZYSTKIE WPISY ===
+@opiekun_bp.route('/dziennik/zatwierdz/<int:student_id>', methods=['POST'])
+@role_required('opiekun')
+def dziennik_zatwierdz(student_id):
+
+    logs = models.DziennikWpis.query.filter_by(
+        student_id=student_id
+    ).all()
+
+    for log in logs:
+
+        # pomijaj już zatwierdzone / odrzucone
+        if log.status in ['zatwierdzony', 'odrzucony']:
+            continue
+
+        log.status = 'zatwierdzony'
+        log.data_zatwierdzenia = datetime.utcnow()
+
+    models.db.session.commit()
+
+    flash(
+        'Wpisy zostały zatwierdzone.',
+        'success'
+    )
+
+    return redirect(
+        url_for(
+            'opiekun.dziennik',
+            student_id=student_id
+        )
+    )
+
+
+# === ODRZUC WPIS ===
+@opiekun_bp.route('/dziennik/odrzuc/<int:wpis_id>', methods=['POST'])
+@role_required('opiekun')
+def dziennik_odrzuc(wpis_id):
+
+    wpis = models.DziennikWpis.query.filter_by(
+        id=wpis_id
+    ).first_or_404()
+
+    powod_odrzucenia = request.form.get(
+        'powod_odrzucenia',
+        ''
+    ).strip()
+
+    if not powod_odrzucenia:
+
+        flash(
+            'Musisz podać powód odrzucenia wpisu.',
+            'danger'
+        )
+
+        return redirect(
+            url_for(
+                'opiekun.dziennik',
+                student_id=wpis.student_id
+            )
+        )
+
+    wpis.status = 'odrzucony'
+    wpis.powod_odrzucenia = powod_odrzucenia
+
+    models.db.session.commit()
+
+    flash(
+        'Wpis został odrzucony.',
+        'warning'
+    )
+
+    return redirect(
+        url_for(
+            'opiekun.dziennik',
+            student_id=wpis.student_id
+        )
+    )
+
+
+# ============================================================================
+# === FORMULARZ ===
+# ============================================================================
+
+@opiekun_bp.route('/formularz/<int:formularz_id>', methods=['GET'])
+@role_required('opiekun')
+def formularz(formularz_id):
+    formularz = models.FormularzPraktyk.query.filter_by(id=formularz_id).first_or_404()
+    return render_template('components/formularz_praktyk.html', formularz=formularz)
+
+
+# ============================================================================
+# === PROFILE ===
+# ============================================================================
+
+# === WLASNY PROFIL ===
+@opiekun_bp.route('/profil_uzytkownika', methods=['GET'])
+@role_required('opiekun')
+def profil_uzytkownika():
+    uzytkownik = current_user
+    return render_template('components/profil_uzytkownika.html', uzytkownik=uzytkownik)
+
+
+# === WLASNY PROFIL -> EDYTUJ ===
+@opiekun_bp.route('/profil_uzytkownika/edytuj', methods=['GET', 'POST'])
+@role_required('opiekun')
+def edytuj_profil_uzytkownika():
+    profil = get_profile()
+    uzytkownik = current_user
+    
+    if request.method == 'POST':
+        # ...
+        models.db.session.commit()
+        return redirect(url_for('opiekun.profil_uzytkownika'))
+
+    return render_template('components/profil_uzytkownika_edytuj.html', uzytkownik=uzytkownik)
+
+
+# === LISTA STUDENTOW ===
+@opiekun_bp.route('/lista_studentow', methods=['GET'])
+@role_required('opiekun')
+def lista_studentow():
+    current_user_profile = get_profile()
+
+    if current_user_profile.typ_opiekuna == 'zakladowy':
+        studenci = (
+            models.Uzytkownik.query
+            .join(models.StudentProfil)
+            .join(
+                models.FormularzPraktyk,
+                models.FormularzPraktyk.student_id == models.StudentProfil.id
+            )
+            .filter(
+                models.FormularzPraktyk.opiekun_zakladowy_id == current_user_profile.id
+            )
+            .distinct()
+            .all()
+        )
+    else:
+        studenci = (
+            models.Uzytkownik.query
+            .join(models.StudentProfil)
+            .join(
+                models.FormularzPraktyk,
+                models.FormularzPraktyk.student_id == models.StudentProfil.id
+            )
+            .filter(
+                models.FormularzPraktyk.opiekun_uczelniany_id == current_user_profile.id
+            )
+            .distinct()
+            .all()
+        )
+
+    return render_template(
+        'opiekun/lista_studentow.html',
+        studenci=studenci
+    )
+
+
+# === PROFIL STUDENTA ===
+@opiekun_bp.route('/profil_studenta/<int:uzytkownik_id>', methods=['GET'])
+@role_required('opiekun')
+def profil_studenta(uzytkownik_id):
+    print(uzytkownik_id)
+    uzytkownik = models.Uzytkownik.query.filter_by(
+        id=uzytkownik_id
+    ).first_or_404()
+
+    print(uzytkownik)
+    return render_template(
+        'components/profil_uzytkownika.html',
+        uzytkownik=uzytkownik
+    )

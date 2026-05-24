@@ -1,0 +1,222 @@
+{% extends 'layout.html' %}
+{% block content %}
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="page-title mb-1">Profil studenta</h1>
+            <p class="text-muted mb-0">
+                Informacje o koncie oraz profilu studenta.
+            </p>
+        </div>
+
+        {% if current_user.rola == 'student' %}
+        <a href="{{ url_for('student.edytuj_profil_studenta') }}"
+           class="btn btn-primary">
+            <i class="bi bi-pencil-square"></i>
+            Edytuj profil
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- Main card -->
+    <div class="card">
+
+        <!-- Card header -->
+        <div class="card-header d-flex justify-content-between align-items-start">
+            <div>
+                <h2 class="card-title mb-1">
+                    {{ profil.uzytkownik.imie }}
+                    {{ profil.uzytkownik.nazwisko }}
+                </h2>
+
+                <p class="card-subtitle text-muted">
+                    Student · {{ profil.kierunek or 'Brak kierunku' }}
+                </p>
+            </div>
+
+            {% if profil.uzytkownik.konto_aktywne %}
+                <span class="badge badge-success">
+                    Konto aktywne
+                </span>
+            {% else %}
+                <span class="badge badge-warning">
+                    Konto nieaktywne
+                </span>
+            {% endif %}
+        </div>
+
+        <!-- Card body -->
+        <div class="card-body">
+
+            <!-- Dane podstawowe -->
+            <div class="row mb-4">
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Imię
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.uzytkownik.imie }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Nazwisko
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.uzytkownik.nazwisko }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Numer indeksu
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.indeks or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Semestr
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.semestr or 'Brak danych' }}
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Dane kontaktowe -->
+            <div class="row mb-4">
+
+                <div class="col-md-6 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Adres email
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.uzytkownik.email }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Telefon
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.uzytkownik.telefon or 'Brak danych' }}
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Studia -->
+            <div class="row mb-4">
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Kierunek
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.kierunek or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Specjalność
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.specjalnosc or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Rok akademicki
+                    </p>
+                    <p class="font-weight-bold mb-0">
+                        {{ profil.rok_akademicki or 'Brak danych' }}
+                    </p>
+                </div>
+
+                <div class="col-md-6 col-xl-3 mb-3">
+                    <p class="text-muted text-uppercase small mb-1">
+                        Tryb studiów
+                    </p>
+
+                    <p class="font-weight-bold mb-0">
+                        {% if profil.czy_stacjonarne %}
+                            Stacjonarne
+                        {% else %}
+                            Niestacjonarne
+                        {% endif %}
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- Opiekunowie -->
+            <div class="row">
+
+                <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3 h-100">
+
+                        <p class="text-muted text-uppercase small mb-2">
+                            Opiekun uczelniany
+                        </p>
+
+                        {% if profil.opiekun_uczelniany %}
+                            <p class="font-weight-bold mb-1">
+                                {{ profil.opiekun_uczelniany.uzytkownik.imie }}
+                                {{ profil.opiekun_uczelniany.uzytkownik.nazwisko }}
+                            </p>
+
+                            <p class="text-muted mb-0">
+                                {{ profil.opiekun_uczelniany.uzytkownik.email }}
+                            </p>
+                        {% else %}
+                            <p class="text-muted mb-0">
+                                Brak przypisanego opiekuna
+                            </p>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3 h-100">
+
+                        <p class="text-muted text-uppercase small mb-2">
+                            Opiekun zakładowy
+                        </p>
+
+                        {% if profil.opiekun_zakladowy %}
+                            <p class="font-weight-bold mb-1">
+                                {{ profil.opiekun_zakladowy.uzytkownik.imie }}
+                                {{ profil.opiekun_zakladowy.uzytkownik.nazwisko }}
+                            </p>
+
+                            <p class="text-muted mb-0">
+                                {{ profil.opiekun_zakladowy.uzytkownik.email }}
+                            </p>
+                        {% else %}
+                            <p class="text-muted mb-0">
+                                Brak przypisanego opiekuna
+                            </p>
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -87,3 +87,12 @@ Mermaid to darmowe narzędzie do tworzenia diagramów i schematów za pomocą sk
 W projekcie wykorzystano Mermaid do tworzenia diagramów przepływu dokumentacji praktyk, ponieważ:
 - Kod diagramu przechowywany jest bezpośrednio w repozytorium jako tekst, co umożliwia śledzenie zmian przez Git tak samo jak kod źródłowy.
 - Nie wymaga instalacji – diagram edytuje się w dowolnym edytorze tekstowym lub w przeglądarce pod adresem mermaid.live.
+
+---
+
+## API
+
+Aplikacja udostępnia REST API udokumentowane przy pomocy Swagger / Flasgger na `http://localhost:5000/apidocs`
+Zaimplementowano endpointy dla zasobów: `api/student`, `api/harmonogram` oraz `api/formularz`.  
+
+Każdy endpoint obsługuje błędy z wykorzystaniem odpowiednich statusów HTTP oraz zwraca odpowiedzi w formacie JSON zawierające komunikaty o błędach lub dane operacji.
