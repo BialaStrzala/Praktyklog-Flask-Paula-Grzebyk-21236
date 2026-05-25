@@ -9,7 +9,7 @@
 
         {% if current_user.rola == 'opiekun'%}
             <li><a href="{{ url_for('opiekun.dashboard') }}">Dashboard</a></li>
-            <li><a href="{{ url_for('opiekun.formularze') }}">Formularze</a></li>
+            <li><a href="{{ url_for('opiekun.formularze') }}">Praktyki Studentów</a></li>
             <li><a href="{{ url_for('opiekun.lista_studentow') }}">Moi Studenci</a></li>
         {% endif %}
 

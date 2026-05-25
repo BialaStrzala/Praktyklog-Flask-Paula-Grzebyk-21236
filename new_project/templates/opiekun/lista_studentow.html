@@ -25,7 +25,7 @@ Lista Studentów
                     <a class="btn btn-secondary" href="{{ url_for('opiekun.profil_studenta', uzytkownik_id=student.id) }}">Profil</a>
                 </td>
                 <td>
-                    <a class="btn btn-secondary" href="{{ url_for('opiekun.dziennik', student_id=student.id) }}">Dziennik</a>
+                    <a class="btn btn-secondary" href="{{ url_for('opiekun.dziennik', student_id=student.student_profil.id) }}">Dziennik</a>
                 </td>
             </tr>
             {% endfor %}

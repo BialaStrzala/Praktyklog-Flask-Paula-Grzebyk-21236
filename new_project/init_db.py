@@ -1,3 +1,5 @@
+from datetime import date
+
 from app import app, db
 import models as models
 
@@ -6,12 +8,12 @@ with app.app_context():
     db.create_all()
 
     # Firma XYZ
-    firma = models.Firma(nazwa='Firma XYZ')
+    firma = models.Firma(nazwa='Firma XYZ', adres='ul. Przykładowa 1, 00-000 Miasto')
     db.session.add(firma)
     db.session.commit()
 
     # Firma ABC123
-    firma = models.Firma(nazwa='Firma ABC123')
+    firma = models.Firma(nazwa='Firma ABC123', adres='ul. Przykładowa 2, 00-000 Miasto')
     db.session.add(firma)
     db.session.commit()
 
@@ -29,6 +31,22 @@ with app.app_context():
     db.session.commit()
     opiekun_z_profil = models.OpiekunProfil(uzytkownik_id=opiekun_z_uzytkownik.id, firma_id=firma.id, typ_opiekuna='uczelniany')
     db.session.add(opiekun_z_profil)
+    db.session.commit()
+
+    # Student
+    student_uzytkownik = models.Uzytkownik(imie='Piotr', nazwisko='Kowalski', email='student@student.pl', rola='student')
+    db.session.add(student_uzytkownik)
+    db.session.commit()
+    student_profil = models.StudentProfil(uzytkownik_id=student_uzytkownik.id, indeks='123456', kierunek='Informatyka', specjalnosc='Projektowanie baz danych i oprogramowanie uzytkowe', semestr=6, opiekun_uczelniany_id=1, opiekun_zakladowy_id=2)
+    db.session.add(student_profil)
+    db.session.commit()
+
+    # Student 2
+    student_uzytkownik_2 = models.Uzytkownik(imie='Katarzyna', nazwisko='Nowak', email='student2@student.pl', rola='student')
+    db.session.add(student_uzytkownik_2)
+    db.session.commit()
+    student_profil_2 = models.StudentProfil(uzytkownik_id=student_uzytkownik_2.id, indeks='123457', kierunek='Informatyka', specjalnosc='Projektowanie baz danych i oprogramowanie uzytkowe', semestr=6, opiekun_uczelniany_id=1, opiekun_zakladowy_id=2)
+    db.session.add(student_profil_2)
     db.session.commit()
 
     # efekty uczenia
@@ -58,6 +76,46 @@ with app.app_context():
     db.session.add(e11)
     db.session.add(e12)
     db.session.add(e13)
+    db.session.commit()
+
+    # Praktyki studenta 1
+    harmonogram = models.HarmonogramPraktyk(
+        student_id=1,
+        opiekun_zakladowy_id=1,
+        firma_id=1,
+        planowana_liczba_dni=120,
+        planowana_data_rozpoczecia=date.fromisoformat('2026-07-01'),
+        planowana_data_zakonczenia=date.fromisoformat('2027-02-01'),
+        status='zaakceptowany',
+    )
+    db.session.add(harmonogram)
+    db.session.commit()
+
+    formularz = models.FormularzPraktyk(
+        student_id=1, 
+        opiekun_zakladowy_id=1, 
+        firma_id=harmonogram.firma_id, 
+        harmonogram_praktyk_id=harmonogram.id, 
+        data_rozpoczecia=harmonogram.planowana_data_rozpoczecia,
+        data_zakonczenia=harmonogram.planowana_data_zakonczenia,
+        status = 'w_trakcie',
+        )
+    models.db.session.add(formularz)
+    models.db.session.commit()
+
+    # Wpisy studenta 1
+    wpis1 = models.DziennikWpis(
+        student_id=1,
+        nr_dnia=1,
+        data=date.fromisoformat('2026-07-01'),
+        liczba_godzin=8,
+        opis="Pierwszy dzień praktyk. Zapoznanie się z zespołem i środowiskiem pracy."
+        )
+    wpis2 = models.DziennikWpis(student_id=1, nr_dnia=2, data=date.fromisoformat('2026-07-01'), liczba_godzin=7, opis="Drugi dzień praktyk. Udział w spotkaniu projektowym i rozpoczęcie pracy nad zadaniem.")
+    wpis3 = models.DziennikWpis(student_id=1, nr_dnia=3, data=date.fromisoformat('2026-07-02'), liczba_godzin=8, opis="Trzeci dzień praktyk. Kontynuacja pracy nad zadaniem i konsultacje z opiekunem zakładowym.")
+    db.session.add(wpis1)
+    db.session.add(wpis2)
+    db.session.add(wpis3)
     db.session.commit()
 
     print("DB initialized")

@@ -176,7 +176,7 @@
                 class="small text-muted mb-0"
                 style="font-family: 'DM Mono', monospace;">
 
-                {{ formularz.wpisy_zatwierdzone or 0 }}
+                {{ formularz.wpisy_dodane or 0 }}
                 /
                 {{ formularz.wpisy_wymagane or 0 }}
                 wpisów
@@ -192,7 +192,7 @@
             {% if formularz.wpisy_wymagane and formularz.wpisy_wymagane > 0 %}
                 {% set percent = (
                     (
-                        formularz.wpisy_zatwierdzone or 0
+                        formularz.wpisy_dodane or 0
                     ) / formularz.wpisy_wymagane * 100
                 ) | round(1) %}
             {% endif %}

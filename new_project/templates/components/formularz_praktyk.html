@@ -254,7 +254,7 @@ Formularz Praktyk
                 <h5 class="mb-0">Postęp praktyk</h5>
 
                 <span class="text-muted">
-                    {{ liczba_wpisow or 0 }} / {{ formularz.wpisy_wymagane or 120 }}
+                    {{ formularz.liczba_wpisow or 0}} / {{ formularz.wpisy_wymagane or 120 }}
                     wpisów
                 </span>
 
@@ -264,7 +264,7 @@ Formularz Praktyk
 
             {% if formularz.wpisy_wymagane and formularz.wpisy_wymagane > 0 %}
                 {% set percent = (
-                    (liczba_wpisow or 0)
+                    (formularz.liczba_wpisow or 0)
                     / formularz.wpisy_wymagane
                     * 100
                 ) | round(1) %}

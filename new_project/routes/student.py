@@ -40,7 +40,7 @@ def dashboard():
     total_logs = models.DziennikWpis.query.filter_by(student_id=profil.id).count()
 
     for formularz in formularze_praktyk:
-        formularz.wpisy_zatwierdzone = total_logs
+        formularz.wpisy_dodane = total_logs
         harmonogram = None
         if getattr(formularz, 'harmonogram_praktyk', None):
             harmonogram = models.HarmonogramPraktyk.query.get(formularz.harmonogram_praktyk)
@@ -345,12 +345,11 @@ def formularz():
         return redirect(url_for('student.moj_harmonogram'))
     harmonogram = models.HarmonogramPraktyk.query.filter_by(student_id=profil.id).first()
     formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni if harmonogram and getattr(harmonogram, 'planowana_liczba_dni', None) else 120
-    liczba_wpisow = models.DziennikWpis.query.filter_by(student_id=profil.id).count()
+    formularz.liczba_wpisow = models.DziennikWpis.query.filter_by(student_id=profil.id).count()
 
     return render_template('components/formularz_praktyk.html',
         profil=profil,
-        formularz=formularz,
-        liczba_wpisow=liczba_wpisow
+        formularz=formularz
     )
 
 

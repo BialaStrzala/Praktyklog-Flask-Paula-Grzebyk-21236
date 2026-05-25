@@ -61,6 +61,21 @@ def formularze():
             models.FormularzPraktyk.utworzono.desc()
         ).all()
 
+    # liczba wpisow
+    for formularz in formularze_praktyk:
+        wpisy = models.DziennikWpis.query.filter_by(
+            student_id=formularz.student_id
+        ).all()
+        harmonogram = models.HarmonogramPraktyk.query.filter_by(
+            student_id=formularz.student_id
+        ).first()
+        formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni
+        formularz.wpisy_dodane = len(wpisy)
+        formularz.wpisy_do_zatwierdzenia = len([
+            wpis for wpis in wpisy
+            if wpis.status == 'w_trakcie'
+        ])
+
     return render_template(
         'opiekun/formularze.html',
         formularze_praktyk=formularze_praktyk
@@ -182,6 +197,16 @@ def dziennik_odrzuc(wpis_id):
 @role_required('opiekun')
 def formularz(formularz_id):
     formularz = models.FormularzPraktyk.query.filter_by(id=formularz_id).first_or_404()
+
+    # liczba wpisow
+    wpisy = models.DziennikWpis.query.filter_by(student_id=formularz.student_id).all()
+    harmonogram = models.HarmonogramPraktyk.query.filter_by(student_id=formularz.student_id).first()
+    formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni
+    formularz.liczba_wpisow = len(wpisy)
+
+    print(formularz.wpisy_wymagane)
+    print(formularz.liczba_wpisow)
+
     return render_template('components/formularz_praktyk.html', formularz=formularz)
 
 
