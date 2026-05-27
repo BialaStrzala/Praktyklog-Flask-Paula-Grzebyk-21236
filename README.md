@@ -1,3 +1,10 @@
+# Paula Grzebyk 21236
+
+Projekt znajduje się w folderze new_project.
+Zostało do wykonania: dodawanie ocen końcowych przez opiekunów, zakończanie praktyk, generowanie plików PDF, rola dziekanatu, poprawki UI, dokończenie dokumentacji
+
+---
+
 # System Obsługi Praktyk Zawodowych
 
 Aplikacja internetowa wspomagająca cyfrowy obieg dokumentacji praktyk zawodowych. System zastępuje tradycyjny, papierowy obieg dokumentów (dziennik praktyk, arkusz efektów uczenia się, opinie opiekunów) procesem cyfrowym z możliwością generowania plików PDF.
