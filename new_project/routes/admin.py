@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, flash, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 import models as models
 from functools import wraps
@@ -22,7 +22,9 @@ def role_required(rola):
 @admin_bp.route('/dashboard')
 @role_required('admin')
 def dashboard():
-    return render_template('admin/dashboard.html')
+    now = datetime.utcnow()
+    profil = None
+    return render_template('admin/dashboard.html', now=now, profil=profil)
 
 
 # ============================================================================
@@ -133,6 +135,78 @@ def harmonogram_odrzuc(harmonogram_id):
 
     return redirect(url_for('admin.harmonogramy'))
 
+
+# ============================================================================
+# === FORMULARZE PRAKTYK ===
+# ============================================================================
+
+# === WSZYSTKIE FORMULARZE ===
+@admin_bp.route('/formularze', methods=['GET'])
+@role_required('admin')
+def formularze():
+    formularze_praktyk = models.FormularzPraktyk.query.order_by(
+        models.FormularzPraktyk.utworzono.desc()).all()
+
+    # liczba wpisow
+    for formularz in formularze_praktyk:
+        wpisy = models.DziennikWpis.query.filter_by(
+            student_id=formularz.student_id
+        ).all()
+        harmonogram = models.HarmonogramPraktyk.query.filter_by(
+            student_id=formularz.student_id
+        ).first()
+        formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni
+        formularz.wpisy_dodane = len(wpisy)
+        formularz.wpisy_do_zatwierdzenia = len([
+            wpis for wpis in wpisy
+            if wpis.status == 'w_trakcie'
+        ])
+
+        # okres praktyk
+        formularz.planowana_liczba_dni = harmonogram.planowana_liczba_dni if harmonogram and getattr(harmonogram, 'planowana_liczba_dni', None) else 120
+        formularz.utworzono_formatted = formularz.utworzono.strftime('%d.%m.%Y') if getattr(formularz, 'utworzono', None) else 'Brak daty'
+        formularz.data_rozpoczecia_formatted = formularz.data_rozpoczecia.strftime('%d.%m.%Y') if getattr(formularz, 'data_rozpoczecia', None) else None
+        formularz.data_zakonczenia_formatted = formularz.data_zakonczenia.strftime('%d.%m.%Y') if getattr(formularz, 'data_zakonczenia', None) else None
+        try:
+            if formularz.data_rozpoczecia and formularz.data_zakonczenia:
+                formularz.pozostale_dni = (formularz.data_zakonczenia - formularz.data_rozpoczecia).days
+            else:
+                formularz.pozostale_dni = None
+        except Exception:
+            formularz.pozostale_dni = None
+
+    return render_template(
+        'admin/formularze.html',
+        formularze_praktyk=formularze_praktyk
+    )
+
+# === WYSWIETL DZIENNIK ===
+@admin_bp.route('/dziennik/<int:student_id>', methods=['GET'])
+@role_required('admin')
+def dziennik(student_id):
+
+    logs = models.DziennikWpis.query.filter_by(
+        student_id=student_id
+    ).order_by(
+        models.DziennikWpis.nr_dnia.asc()
+    ).all()
+
+    formularz = models.FormularzPraktyk.query.filter_by(
+        student_id=student_id,
+        status='w_trakcie'
+    ).first()
+
+    student = models.StudentProfil.query.filter_by(
+        id=student_id
+    ).first()
+
+    return render_template(
+        'admin/dziennik.html',
+        logs=logs,
+        formularz=formularz,
+        student=student
+    )
+
 # ============================================================================
 # === UZYTKOWNICY ===
 # ============================================================================
@@ -152,8 +226,20 @@ def profil_uzytkownika(uzytkownik_id):
     uzytkownik = models.Uzytkownik.query.filter_by(id=uzytkownik_id).first()
     if uzytkownik.rola == 'student':
         uzytkownik_profil = models.StudentProfil.query.filter_by(uzytkownik_id=uzytkownik_id).first()
-    elif uzytkownik.rola in ['opiekun_zakladowy', 'opiekun_uczelniany']:
+    elif uzytkownik.rola == 'opiekun':
         uzytkownik_profil = models.OpiekunProfil.query.filter_by(uzytkownik_id=uzytkownik_id).first()
+        uzytkownik.opiekun_profil.liczba_studentow_uczelnia = (
+            models.FormularzPraktyk.query.filter_by(
+                opiekun_uczelniany_id=uzytkownik_profil.id,
+                status='w_trakcie'
+            ).count()
+        )
+        uzytkownik.opiekun_profil.liczba_studentow_zaklad = (
+            models.FormularzPraktyk.query.filter_by(
+                opiekun_zakladowy_id=uzytkownik_profil.id,
+                status='w_trakcie'
+            ).count()
+        )
     else:
         uzytkownik_profil = None
     return render_template('components/profil_uzytkownika.html', uzytkownik_profil=uzytkownik_profil, uzytkownik=uzytkownik)
@@ -168,6 +254,15 @@ def profil_uzytkownika_edytuj(uzytkownik_id):
         uzytkownik_profil = models.StudentProfil.query.filter_by(uzytkownik_id=uzytkownik_id).first()
     elif uzytkownik.rola in ['opiekun_zakladowy', 'opiekun_uczelniany']:
         uzytkownik_profil = models.OpiekunProfil.query.filter_by(uzytkownik_id=uzytkownik_id).first()
+        uzytkownik_profil.liczba_studentow_uczelnia = models.FormularzPraktyk.query.filter_by(
+            opiekun_uczelniany_id=uzytkownik_profil.id,
+            status='w_trakcie'
+        ).count()
+
+        uzytkownik_profil.liczba_studentow_zaklad = models.FormularzPraktyk.query.filter_by(
+            opiekun_zakladowy_id=uzytkownik_profil.id,
+            status='w_trakcie'
+        ).count()
     else:
         uzytkownik_profil = None
     
@@ -181,4 +276,12 @@ def profil_uzytkownika_edytuj(uzytkownik_id):
 @admin_bp.route('/profil-uzytkownika/usun/<int:uzytkownik_id>', methods=['POST'])
 @role_required('admin')
 def profil_uzytkownika_usun(uzytkownik_id):
-    return 'tbd'
+    uzytkownik = models.Uzytkownik.query.get_or_404(uzytkownik_id)
+    uzytkownik.konto_aktywne = False
+    models.db.session.commit()
+    flash(
+        f'Użytkownik został zdezaktywowany.',
+        'success'
+    )
+
+    return redirect(url_for('admin.uzytkownicy'))

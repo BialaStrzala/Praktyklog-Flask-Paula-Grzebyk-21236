@@ -4,16 +4,24 @@
 
     <!-- HEADER -->
     <div class="card-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+            {% if current_user.rola == 'admin' or current_user.rola == 'dziekanat' %}
+            <div class="mr-3">
+                <p class="card-title mb-1"> {{ formularz.student.uzytkownik.imie }} {{ formularz.student.uzytkownik.nazwisko }}</p>
+                <p class="card-subtitle text-muted text-center small">
+                    {{ formularz.student.indeks }}
+                </p>
+            </div>
+            {% endif %}
 
-        <div>
-
-            <p class="card-title mb-1">
-                {{ formularz.firma.nazwa or 'Brak nazwy firmy' }}
-            </p>
-
-            <p class="card-subtitle text-muted small">
-                Formularz · Dodany {{ formularz.utworzono_formatted or 'Brak daty' }}
-            </p>
+            <div>
+                <p class="card-title mb-1">
+                    {{ formularz.firma.nazwa or 'Brak nazwy firmy' }}
+                </p>
+                <p class="card-subtitle text-muted small">
+                    Formularz · Dodany {{ formularz.utworzono_formatted or 'Brak daty' }}
+                </p>
+            </div>
 
         </div>
 
@@ -35,9 +43,15 @@
             </span>
 
             {% if current_user.rola == 'opiekun' %}
-            <span class="badge badge-primary">
-                {{ formularz.wpisy_do_zatwierdzenia or 0 }} do zatwierdzenia
-            </span>
+                {% if formularz.wpisy_do_zatwierdzenia == 0 or formularz.wpisy_do_zatwierdzenia is none %}
+                <span class="badge badge-secondary ml-2">
+                    {{ formularz.wpisy_do_zatwierdzenia or 0 }} do zatwierdzenia
+                </span>
+                {% else %}
+                <span class="badge badge-primary ml-2">
+                    {{ formularz.wpisy_do_zatwierdzenia or 0 }} do zatwierdzenia
+                </span>
+                {% endif %}
             {% endif %}
 
         </div>
@@ -144,9 +158,9 @@
                 </p>
 
                 <p class="font-weight-bold mb-0">
-                    {{ formularz.data_start_formatted or 'Brak' }}
-                    –
-                    {{ formularz.data_end_formatted or 'Brak' }}
+                    {{ formularz.data_rozpoczecia_formatted or 'Brak' }}
+                    -
+                    {{ formularz.data_zakonczenia_formatted or 'Brak' }}
                 </p>
 
                 <p class="text-muted small mb-0">
@@ -154,10 +168,10 @@
                     dni roboczych
                 </p>
 
-                {% if formularz.days_remaining is not none %}
+                {% if formularz.pozostale_dni is not none %}
                 <p class="text-muted small mb-0">
                     Pozostało dni:
-                    <strong>{{ formularz.days_remaining }}</strong>
+                    <strong>{{ formularz.pozostale_dni }}</strong>
                 </p>
                 {% endif %}
 
@@ -213,41 +227,29 @@
         <div class="d-flex gap-2 flex-wrap">
 
             {% if current_user.rola == 'student' %}
-
             <a
                 href="{{ url_for('student.dziennik') }}"
                 class="btn btn-primary btn-sm">
-
                 Otwórz dziennik
-
             </a>
-
             <a
                 href="{{ url_for('student.formularz') }}"
-                class="btn btn-secondary btn-sm">
-
+                class="btn btn-secondary btn-sm ml-2">
                 Szczegóły formularza
-
             </a>
+            {% endif %}
 
-            {% elif current_user.rola == 'opiekun' %}
-
+            {% if current_user.rola == 'opiekun' %}
             <a
                 href="{{ url_for('opiekun.dziennik', student_id=formularz.student_id) }}"
                 class="btn btn-primary btn-sm">
-
                 Otwórz dziennik
-
             </a>
-
             <a
                 href="{{ url_for('opiekun.formularz', formularz_id=formularz.id) }}"
-                class="btn btn-secondary btn-sm">
-
+                class="btn btn-secondary btn-sm ml-2 ml-2">
                 Szczegóły formularza
-
             </a>
-
             {% endif %}
 
         </div>

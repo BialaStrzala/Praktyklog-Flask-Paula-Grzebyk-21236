@@ -33,7 +33,21 @@ def get_profile():
 @opiekun_bp.route('/dashboard')
 @role_required('opiekun')
 def dashboard():
-    return render_template('opiekun/dashboard.html')
+    profil = get_profile()
+    now = datetime.utcnow()
+    studenci_aktywni = models.StudentProfil.query.join(models.FormularzPraktyk).filter(
+        (models.FormularzPraktyk.opiekun_zakladowy_id == profil.id) | 
+        (models.FormularzPraktyk.opiekun_uczelniany_id == profil.id),
+        models.FormularzPraktyk.status == 'w_trakcie'
+    ).distinct().all()
+
+    wpisy_oczekujace = models.DziennikWpis.query.join(models.StudentProfil).join(models.FormularzPraktyk).filter(
+        (models.FormularzPraktyk.opiekun_zakladowy_id == profil.id) | 
+        (models.FormularzPraktyk.opiekun_uczelniany_id == profil.id),
+        models.DziennikWpis.status == 'w_trakcie'
+    ).all()
+    
+    return render_template('opiekun/dashboard.html', profil=profil, now=now, studenci_aktywni=studenci_aktywni, wpisy_oczekujace=wpisy_oczekujace)
 
 
 # ============================================================================
@@ -75,6 +89,19 @@ def formularze():
             wpis for wpis in wpisy
             if wpis.status == 'w_trakcie'
         ])
+
+        # okres praktyk
+        formularz.planowana_liczba_dni = harmonogram.planowana_liczba_dni if harmonogram and getattr(harmonogram, 'planowana_liczba_dni', None) else 120
+        formularz.utworzono_formatted = formularz.utworzono.strftime('%d.%m.%Y') if getattr(formularz, 'utworzono', None) else 'Brak daty'
+        formularz.data_rozpoczecia_formatted = formularz.data_rozpoczecia.strftime('%d.%m.%Y') if getattr(formularz, 'data_rozpoczecia', None) else None
+        formularz.data_zakonczenia_formatted = formularz.data_zakonczenia.strftime('%d.%m.%Y') if getattr(formularz, 'data_zakonczenia', None) else None
+        try:
+            if formularz.data_rozpoczecia and formularz.data_zakonczenia:
+                formularz.pozostale_dni = (formularz.data_zakonczenia - formularz.data_rozpoczecia).days
+            else:
+                formularz.pozostale_dni = None
+        except Exception:
+            formularz.pozostale_dni = None
 
     return render_template(
         'opiekun/formularze.html',
@@ -219,7 +246,18 @@ def formularz(formularz_id):
 @role_required('opiekun')
 def profil_uzytkownika():
     uzytkownik = current_user
-    return render_template('components/profil_uzytkownika.html', uzytkownik=uzytkownik)
+    profil = get_profile()
+    profil.liczba_studentow_uczelnia = models.FormularzPraktyk.query.filter_by(
+        opiekun_uczelniany_id=profil.id,
+        status='w_trakcie'
+    ).count()
+
+    profil.liczba_studentow_zaklad = models.FormularzPraktyk.query.filter_by(
+        opiekun_zakladowy_id=profil.id,
+        status='w_trakcie'
+    ).count()
+
+    return render_template('components/profil_uzytkownika.html', uzytkownik=uzytkownik, profil=profil)
 
 
 # === WLASNY PROFIL -> EDYTUJ ===
@@ -230,7 +268,8 @@ def edytuj_profil_uzytkownika():
     uzytkownik = current_user
     
     if request.method == 'POST':
-        # ...
+        telefon = request.form.get('telefon') or None
+        current_user.telefon = telefon
         models.db.session.commit()
         return redirect(url_for('opiekun.profil_uzytkownika'))
 

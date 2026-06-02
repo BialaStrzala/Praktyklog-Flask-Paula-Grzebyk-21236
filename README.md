@@ -1,13 +1,8 @@
 # Paula Grzebyk 21236
 
-Projekt znajduje się w folderze new_project.
-Zostało do wykonania: dodawanie ocen końcowych przez opiekunów, zakończanie praktyk, generowanie plików PDF, rola dziekanatu, poprawki UI, dokończenie dokumentacji
-
----
-
 # System Obsługi Praktyk Zawodowych
 
-Aplikacja internetowa wspomagająca cyfrowy obieg dokumentacji praktyk zawodowych. System zastępuje tradycyjny, papierowy obieg dokumentów (dziennik praktyk, arkusz efektów uczenia się, opinie opiekunów) procesem cyfrowym z możliwością generowania plików PDF.
+Aplikacja internetowa wspomagająca cyfrowy obieg dokumentacji praktyk zawodowych. System zastępuje tradycyjny, papierowy obieg dokumentów (dziennik praktyk, arkusz efektów uczenia się, opinie opiekunów) procesem cyfrowym z możliwością generowania plików PDF. 
 
 ---
 
@@ -88,12 +83,20 @@ DBeaver Community to darmowe, wieloplatformowe narzędzie graficzne do zarządza
 
 DBeaver obsługuje SQLite, MySQL, PostgreSQL i wiele innych silników, co umożliwia używanie tego samego narzędzia po ewentualnej migracji bazy danych.
 
+<div align="center">
+    <img src="documentation/erd.png">
+</div>
+
 ### Narzędzie do tworzenia diagramów przepływu - Mermaid
 
 Mermaid to darmowe narzędzie do tworzenia diagramów i schematów za pomocą składni tekstowej, zbliżonej do Markdown.
 W projekcie wykorzystano Mermaid do tworzenia diagramów przepływu dokumentacji praktyk, ponieważ:
 - Kod diagramu przechowywany jest bezpośrednio w repozytorium jako tekst, co umożliwia śledzenie zmian przez Git tak samo jak kod źródłowy.
 - Nie wymaga instalacji – diagram edytuje się w dowolnym edytorze tekstowym lub w przeglądarce pod adresem mermaid.live.
+
+<div align="center">
+    <img src="documentation/flow_harmonogram.png">
+</div>
 
 ---
 
@@ -103,3 +106,7 @@ Aplikacja udostępnia REST API udokumentowane przy pomocy Swagger / Flasgger na 
 Zaimplementowano endpointy dla zasobów: `api/student`, `api/harmonogram` oraz `api/formularz`.  
 
 Każdy endpoint obsługuje błędy z wykorzystaniem odpowiednich statusów HTTP oraz zwraca odpowiedzi w formacie JSON zawierające komunikaty o błędach lub dane operacji.
+
+<div align="center">
+    <img src="documentation/api/formularze_praktyk.png">
+</div>

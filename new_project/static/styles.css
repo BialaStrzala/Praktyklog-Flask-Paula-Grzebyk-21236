@@ -40,6 +40,10 @@
     --neutral: #6b7280;
     --neutral-light: #f3f4f6;
 
+    --success-light: #d6ffbb;
+    --danger-light: #ffc8c8;
+    --info-light: #d2e2e4;
+
     --sidebar-width: 220px;
     --topbar-height: 64px;
     --radius-sm: 6px;
@@ -624,6 +628,55 @@ textarea.form-control {
     background: var(--info-light);
     color: #0e7490;
     border-color: var(--info);
+}
+
+.welcome-banner {
+    background: linear-gradient(120deg, var(--navbar-background) 0%, var(--sidebar-background) 100%);
+    border-radius: 16px;
+    color: #fff;
+    padding: 1.8rem 2rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+    overflow: hidden;
+}
+.welcome-banner .role-badge {
+    display: inline-block;
+    background: var(--sidebar-background);
+    border: 1px solid var(--sidebar-buttons);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 3px 12px;
+    margin-bottom: 10px;
+    color: rgba(255,255,255,0.9);
+}
+.welcome-banner h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: #fff;
+}
+.welcome-banner p {
+    margin: 0;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.88rem;
+}
+
+.success {
+    background-color: var(--success-light);
+}
+.error, .danger {
+    background-color: var(--danger-light);
+}
+.info{
+    background-color: var(--info-light);
+}
+
+.messages, .success, .error, .danger, .info{
+    display: block;
+    min-width: 100%;
 }
 
 /*=============================================================

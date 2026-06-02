@@ -1,0 +1,25 @@
+<div class="welcome-banner">
+    <span class="role-badge">
+        {% if current_user.rola == 'student' %}
+            Student
+        {% endif %}
+        {% if current_user.rola == 'admin' %}
+            Administrator
+        {% endif %}
+        {% if current_user.rola == 'opiekun' %}
+            {% if profil.typ_opiekuna == 'zakladowy' %}
+                Opiekun Zakładowy
+            {% endif %}
+            {% if profil.typ_opiekuna == 'uczelniany' %}
+                Opiekun Uczelniany
+            {% endif %}
+        {% endif %}
+    </span>
+    <h2>Witaj, {{ current_user.imie }} {{ current_user.nazwisko }}!</h2>
+    <p>
+        {% if profil.firma %}
+            {{ profil.firma.nazwa }} ·
+        {% endif %}
+        {{ now.strftime('%A, %d %B %Y') }}
+    </p>
+</div>

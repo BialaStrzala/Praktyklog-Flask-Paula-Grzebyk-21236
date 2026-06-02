@@ -41,10 +41,12 @@ Formularz Praktyk
             <span class="{{ status_class }}">
                 {{ status_label }}
             </span>
+            {% if current_user.rola == 'student' %}
             <a href="{{ url_for('student.edytuj_harmonogram', harmonogram_id=formularz.harmonogram.id) }}"
             class="btn btn-outline-primary btn-sm">
                 Harmonogram
             </a>
+            {% endif %}
         </div>
 
     </div>
@@ -64,10 +66,24 @@ Formularz Praktyk
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">Student</h5>
 
+                {% if current_user.rola == 'student' %}
                 <a href="{{ url_for('student.profil_uzytkownika') }}"
                    class="btn btn-outline-primary btn-sm">
                     Otwórz profil
                 </a>
+                {% endif %}
+                {% if current_user.rola == 'admin' or current_user.rola == 'dziekanat' %}
+                <a href="{{ url_for('admin.profil_uzytkownika', uzytkownik_id=formularz.student.uzytkownik.id) }}"
+                   class="btn btn-outline-primary btn-sm">
+                    Otwórz profil
+                </a>
+                {% endif %}
+                {% if current_user.rola == 'opiekun' %}
+                <a href="{{ url_for('opiekun.profil_studenta', uzytkownik_id=formularz.student.uzytkownik.id) }}"
+                   class="btn btn-outline-primary btn-sm">
+                    Otwórz profil
+                </a>
+                {% endif %}
             </div>
 
             <div class="row">
@@ -143,12 +159,14 @@ Formularz Praktyk
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="mb-0">Opiekun zakładowy</h6>
 
+                            <!--
                             {% if formularz.opiekun_zakladowy %}
                             <a href="#"
                                class="btn btn-outline-secondary btn-sm">
                                 Profil
                             </a>
                             {% endif %}
+                            -->
                         </div>
 
                         {% if formularz.opiekun_zakladowy %}
@@ -186,12 +204,14 @@ Formularz Praktyk
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="mb-0">Opiekun uczelniany</h6>
 
+                            <!--
                             {% if formularz.opiekun_uczelniany %}
                             <a href="#"
                                class="btn btn-outline-secondary btn-sm">
                                 Profil
                             </a>
                             {% endif %}
+                            -->
                         </div>
 
                         {% if formularz.opiekun_uczelniany %}

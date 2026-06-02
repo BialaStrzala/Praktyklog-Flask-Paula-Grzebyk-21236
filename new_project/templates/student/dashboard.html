@@ -1,14 +1,10 @@
 {% extends 'layout.html' %}
 
-{% block pagetitle %}Dashboard Studenta – Praktyklog{% endblock %}
+{% block pagetitle %}Dashboard{% endblock %}
 
 {% block pagecontent %}
 
-<!-- Page header -->
-<div class="page-header">
-    <h2>Dashboard studenta</h2>
-    <p>Witaj z powrotem, <strong>{{ current_user.imie }} {{ current_user.nazwisko }}</strong> · Nr indeksu: <span class="mono">{{ profil.indeks }}</span></p>
-</div>
+{% include 'components/mini/welcome_card.html' %}
 
 <!-- Internship forms list -->
 <div class="mb-16 flex items-center justify-between">
@@ -19,5 +15,8 @@
 {% for formularz in formularze_praktyk %}
     {% include 'components/formularze_praktyk_grid.html' %}
 {% endfor %}
+{% if not formularze_praktyk %}
+    <p>Brak formularzy praktyk.</p>
+{% endif %}
 
 {% endblock %}

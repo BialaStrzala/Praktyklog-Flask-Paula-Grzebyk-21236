@@ -26,8 +26,8 @@ class Uzytkownik(db.Model, UserMixin):
     auth_provider = db.Column(db.String(50), default="microsoft")
     external_id = db.Column(db.String(255), unique=True)
 
-    student_profil = db.relationship('StudentProfil', backref='uzytkownik', uselist=False)
-    opiekun_profil = db.relationship('OpiekunProfil', backref='uzytkownik', uselist=False)
+    student_profil = db.relationship('StudentProfil', backref='uzytkownik', uselist=False, cascade='all, delete-orphan')
+    opiekun_profil = db.relationship('OpiekunProfil', backref='uzytkownik', uselist=False, cascade='all, delete-orphan')
 
     def set_password(self, haslo):
         self.haslo_hash = generate_password_hash(haslo)
@@ -44,8 +44,8 @@ class Firma(db.Model):
     nazwa = db.Column(db.String(200), nullable=False)
     adres = db.Column(db.String(300), nullable=True)
 
-    opiekunowie = db.relationship('OpiekunProfil', backref='firma', lazy=True)
-    formularze = db.relationship('FormularzPraktyk', backref='firma', lazy=True)
+    opiekunowie = db.relationship('OpiekunProfil', backref='firma', lazy=True, cascade='all, delete-orphan')
+    formularze = db.relationship('FormularzPraktyk', backref='firma', lazy=True, cascade='all, delete-orphan')
 
 
 # === PROFIL OPIEKUNA ===
@@ -61,13 +61,15 @@ class OpiekunProfil(db.Model):
         'StudentProfil',
         foreign_keys='StudentProfil.opiekun_zakladowy_id',
         backref='opiekun_zakladowy',
-        lazy=True
+        lazy=True,
+        cascade='all, delete-orphan'
     )
     podpieci_studenci_uczelnia = db.relationship(
         'StudentProfil',
         foreign_keys='StudentProfil.opiekun_uczelniany_id',
         backref='opiekun_uczelniany',
-        lazy=True
+        lazy=True,
+        cascade='all, delete-orphan'
     )
 
 
@@ -169,7 +171,7 @@ class HarmonogramPraktyk(db.Model):
     powod_odrzucenia = db.Column(db.String(500), nullable=True)
     utworzono = db.Column(db.DateTime, default=datetime.now)
 
-    efekty_harmonogramu = db.relationship('EfektUczeniaHarmonogram', backref='harmonogram', lazy=True)
+    efekty_harmonogramu = db.relationship('EfektUczeniaHarmonogram', backref='harmonogram', lazy=True, cascade='all, delete-orphan')
 
 
 # === EFEKTY UCZENIA – POWIĄZANIE Z HARMONOGRAMEM ===
@@ -202,7 +204,7 @@ class DziennikWpis(db.Model):
     utworzono = db.Column(db.DateTime, default=datetime.now)
     zaktualizowano = db.Column(db.DateTime, default=datetime.now, onupdate=datetime.now)
 
-    efekty = db.relationship('DziennikEfekt', backref='wpis', lazy=True, cascade='all, delete-orphan')
+    efekty = db.relationship('DziennikEfekt', backref='wpis', lazy=True)
 
 
 # === DZIENNIK PRAKTYK – EFEKT UCZENIA WPISU ===

@@ -6,7 +6,8 @@ student
 
 admin/dziekanat
 - zatwierdza harmonogramy (dodaje opiekunow) -> auto +formularz - OK
-- wyswietla liste uzytkownikow
+- wyswietla formularze
+- wyswietla liste uzytkownikow - OK
 - wlsany profil (wyswietla/edytuje)
 
 opiekun
