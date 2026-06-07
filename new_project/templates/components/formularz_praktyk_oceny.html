@@ -1,0 +1,363 @@
+{% extends 'layout.html' %}
+
+{% block pagetitle %}Formularz Praktyk{% endblock %}
+
+{% block pagecontent %}
+
+{% if formularz %}
+
+{% set status_map = {
+    'w_trakcie': ('W trakcie', 'badge badge-warning'),
+    'zakonczone': ('Zakończone', 'badge badge-success'),
+    'porzucone': ('Porzucone', 'badge badge-danger')
+} %}
+{% set status_label, status_class = status_map.get(formularz.status, ('Nieznany', 'badge badge-secondary')) %}
+
+{% set jest_opiekun_zakladowy  = current_user.rola == 'opiekun' and current_user_profil.typ_opiekuna == 'zakladowy' %}
+{% set jest_opiekun_uczelniany = current_user.rola == 'opiekun' and current_user_profil.typ_opiekuna == 'uczelniany' %}
+{% set jest_admin              = current_user.rola in ('admin', 'dziekanat') %}
+
+<div class="card shadow-sm border-0">
+
+    <!-- HEADER -->
+    <div class="card-header bg-white d-flex justify-content-between align-items-start">
+        <div>
+            <h3 class="mb-1">{{ formularz.firma.nazwa if formularz.firma else 'Brak firmy' }}</h3>
+            <p class="text-muted mb-0">Formularz praktyk #{{ formularz.id }}</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="{{ status_class }}">{{ status_label }}</span>
+            {% if current_user.rola == 'student' %}
+                <a href="{{ url_for('student.edytuj_harmonogram', harmonogram_id=formularz.harmonogram.id) }}"
+                   class="btn btn-outline-primary btn-sm">Harmonogram</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <!-- ================================================================ -->
+        <!-- STUDENT -->
+        <!-- ================================================================ -->
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Student</h5>
+                {% if current_user.rola == 'student' %}
+                    <a href="{{ url_for('student.profil_uzytkownika') }}" class="btn btn-outline-primary btn-sm">Otwórz profil</a>
+                {% elif current_user.rola in ('admin', 'dziekanat') %}
+                    <a href="{{ url_for('admin.profil_uzytkownika', uzytkownik_id=formularz.student.uzytkownik.id) }}" class="btn btn-outline-primary btn-sm">Otwórz profil</a>
+                {% elif current_user.rola == 'opiekun' %}
+                    <a href="{{ url_for('opiekun.profil_studenta', uzytkownik_id=formularz.student.uzytkownik.id) }}" class="btn btn-outline-primary btn-sm">Otwórz profil</a>
+                {% endif %}
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Imię i nazwisko</p>
+                    <p class="fw-bold mb-0">{{ formularz.student.uzytkownik.imie }} {{ formularz.student.uzytkownik.nazwisko }}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Email</p>
+                    <p class="mb-0">{{ formularz.student.uzytkownik.email }}</p>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Telefon</p>
+                    <p class="mb-0">{{ formularz.student.uzytkownik.telefon or 'Brak telefonu' }}</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Indeks</p>
+                    <p class="fw-bold mb-0">{{ formularz.student.indeks or 'Brak' }}</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Kierunek</p>
+                    <p class="mb-0">{{ formularz.student.kierunek or 'Brak' }}</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Specjalność</p>
+                    <p class="mb-0">{{ formularz.student.specjalnosc or 'Brak' }}</p>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <p class="text-muted small text-uppercase mb-1">Semestr</p>
+                    <p class="mb-0">{{ formularz.student.semestr or 'Brak' }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================ -->
+        <!-- OPIEKUNOWIE -->
+        <!-- ================================================================ -->
+        <div class="mb-5">
+            <h5 class="mb-3">Opiekunowie</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3 h-100">
+                        <h6 class="mb-3">Opiekun zakładowy</h6>
+                        {% if formularz.opiekun_zakladowy %}
+                            <p class="fw-bold mb-1">{{ formularz.opiekun_zakladowy.uzytkownik.imie }} {{ formularz.opiekun_zakladowy.uzytkownik.nazwisko }}</p>
+                            <p class="text-muted mb-1">{{ formularz.opiekun_zakladowy.uzytkownik.email }}</p>
+                            <p class="small text-muted mb-0">{{ formularz.opiekun_zakladowy.firma.nazwa if formularz.opiekun_zakladowy.firma else '' }}</p>
+                        {% else %}
+                            <p class="text-muted mb-0">Brak przypisanego opiekuna zakładowego.</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="border rounded p-3 h-100">
+                        <h6 class="mb-3">Opiekun uczelniany</h6>
+                        {% if formularz.opiekun_uczelniany %}
+                            <p class="fw-bold mb-1">{{ formularz.opiekun_uczelniany.uzytkownik.imie }} {{ formularz.opiekun_uczelniany.uzytkownik.nazwisko }}</p>
+                            <p class="text-muted mb-0">{{ formularz.opiekun_uczelniany.uzytkownik.email }}</p>
+                        {% else %}
+                            <p class="text-muted mb-0">Brak przypisanego opiekuna uczelnianego.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================ -->
+        <!-- FIRMA -->
+        <!-- ================================================================ -->
+        <div class="mb-5">
+            <h5 class="mb-3">Firma</h5>
+            <div class="border rounded p-3">
+                <h6 class="fw-bold mb-2">{{ formularz.firma.nazwa if formularz.firma else 'Brak firmy' }}</h6>
+                <p class="text-muted mb-0">{{ formularz.firma.adres if formularz.firma else 'Brak adresu' }}</p>
+            </div>
+        </div>
+
+        <!-- ================================================================ -->
+        <!-- POSTĘP -->
+        <!-- ================================================================ -->
+        <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Postęp praktyk</h5>
+                <span class="text-muted">{{ formularz.liczba_wpisow or 0 }} / {{ formularz.wpisy_wymagane or 120 }} wpisów</span>
+            </div>
+            {% set percent = 0 %}
+            {% if formularz.wpisy_wymagane and formularz.wpisy_wymagane > 0 %}
+                {% set percent = ((formularz.liczba_wpisow or 0) / formularz.wpisy_wymagane * 100) | round(1) %}
+            {% endif %}
+            <div class="progress" style="height:12px;">
+                <div class="progress-bar" role="progressbar" style="width:{{ percent }}%;"></div>
+            </div>
+        </div>
+
+        <!-- ================================================================ -->
+        <!-- OCENY I OPINIE -->
+        <!-- ================================================================ -->
+        <div>
+            <h5 class="mb-4">Oceny i opinie</h5>
+
+            <!-- ── Opiekun zakładowy ── -->
+            <div class="border rounded p-4 mb-3">
+                <h6 class="mb-3">Opiekun zakładowy</h6>
+
+                {% if jest_opiekun_zakladowy %}
+                <form method="POST"
+                      action="{{ url_for('opiekun.zapisz_ocene_zakladowy', formularz_id=formularz.id) }}"
+                      onsubmit="return confirm('Czy na pewno chcesz zatwierdzić ocenę? Operacji nie można cofnąć.')">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label
+                                for="ocena_zakladowy"
+                                class="fw-semibold form-label">
+                                Ocena (2-5)
+                            </label>
+                            <select
+                                id="ocena_zakladowy"
+                                name="ocena_opiekuna_zakladowego"
+                                class="custom-select shadow-sm"
+                                required>
+                                <option
+                                    value=""
+                                    disabled
+                                    {% if not formularz.ocena_opiekuna_zakladowego %}selected{% endif %}>
+                                    Wybierz ocenę
+                                </option>
+                                {% for ocena in [2.0, 3.0, 3.5, 4.0, 4.5, 5.0] %}
+                                <option
+                                    value="{{ ocena }}"
+                                    {% if formularz.ocena_opiekuna_zakladowego == ocena %}selected{% endif %}>
+                                    {{ ocena }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                Wybierz ocenę w skali od 2.0 do 5.0
+                            </small>
+                        </div>
+                        <div class="col-md-9 mb-3">
+                            <label class="form-label fw-semibold" for="opinia_zakladowy">Opinia</label>
+                            <textarea class="form-control" id="opinia_zakladowy"
+                                      name="opinia_opiekuna_zakladowego" rows="3"
+                                      placeholder="Wpisz opinię o studencie...">{{ formularz.opinia_opiekuna_zakladowego or '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning small py-2 mb-3">
+                        Zapisana ocena i opinia będą widoczne dla studenta i dziekanatu natychmiast po zatwierdzeniu.
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Zatwierdź ocenę</button>
+                </form>
+
+                {% else %}
+                <div class="row">
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <p class="text-muted small text-uppercase mb-1">Ocena</p>
+                        <span class="fs-3 fw-bold">{{ formularz.ocena_opiekuna_zakladowego or '—' }}</span>
+                    </div>
+                    <div class="col-md-10">
+                        <p class="text-muted small text-uppercase mb-1">Opinia</p>
+                        <p class="mb-0">{{ formularz.opinia_opiekuna_zakladowego or 'Brak opinii.' }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ── Opiekun uczelniany ── -->
+            <div class="border rounded p-4 mb-3">
+                <h6 class="mb-3">Opiekun uczelniany</h6>
+
+                {% if jest_opiekun_uczelniany %}
+                <form method="POST"
+                      action="{{ url_for('opiekun.zapisz_ocene_uczelniany', formularz_id=formularz.id) }}"
+                      onsubmit="return confirm('Czy na pewno chcesz zatwierdzić ocenę? Operacji nie można cofnąć.')">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label
+                                for="ocena_uczelniany"
+                                class="fw-semibold form-label">
+                                Ocena (2-5)
+                            </label>
+                            <select
+                                id="ocena_uczelniany"
+                                name="ocena_opiekuna_uczelnianego"
+                                class="custom-select shadow-sm"
+                                required>
+                                <option
+                                    value=""
+                                    disabled
+                                    {% if not formularz.ocena_opiekuna_uczelnianego %}selected{% endif %}>
+                                    Wybierz ocenę
+                                </option>
+                                {% for ocena in [2.0, 3.0, 3.5, 4.0, 4.5, 5.0] %}
+                                <option
+                                    value="{{ ocena }}"
+                                    {% if formularz.ocena_opiekuna_uczelnianego == ocena %}selected{% endif %}>
+                                    {{ ocena }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="form-text text-muted">
+                                Wybierz ocenę w skali od 2.0 do 5.0
+                            </small>
+                        </div>
+                        <div class="col-md-9 mb-3">
+                            <label class="form-label fw-semibold" for="opinia_uczelniany">Opinia</label>
+                            <textarea class="form-control" id="opinia_uczelniany"
+                                      name="opinia_opiekuna_uczelnianego" rows="3"
+                                      placeholder="Wpisz opinię o studencie...">{{ formularz.opinia_opiekuna_uczelnianego or '' }}</textarea>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning small py-2 mb-3">
+                        Zapisana ocena i opinia będą widoczne dla studenta i dziekanatu natychmiast po zatwierdzeniu.
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Zatwierdź ocenę</button>
+                </form>
+
+                {% else %}
+                <div class="row">
+                    <div class="col-md-2 mb-3 mb-md-0">
+                        <p class="text-muted small text-uppercase mb-1">Ocena</p>
+                        <span class="fs-3 fw-bold">{{ formularz.ocena_opiekuna_uczelnianego or '—' }}</span>
+                    </div>
+                    <div class="col-md-10">
+                        <p class="text-muted small text-uppercase mb-1">Opinia</p>
+                        <p class="mb-0">{{ formularz.opinia_opiekuna_uczelnianego or 'Brak opinii.' }}</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ── Oceny końcowe ── -->
+            <div class="border rounded p-4 mb-3">
+                <h6 class="mb-3">Oceny końcowe</h6>
+
+                {% if jest_admin %}
+                <form method="POST"
+                      action="{{ url_for('admin.zapisz_oceny_formularz', formularz_id=formularz.id) }}"
+                      onsubmit="return confirm('Czy na pewno chcesz zapisać oceny końcowe?')">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold" for="ocena_sprawozdanie">Sprawozdanie</label>
+                            <select class="form-select" id="ocena_sprawozdanie" name="ocena_sprawozdanie">
+                                <option value="">— brak —</option>
+                                {% for ocena in [2.0, 3.0, 3.5, 4.0, 4.5, 5.0] %}
+                                <option value="{{ ocena }}"
+                                    {% if formularz.ocena_sprawozdanie == ocena %}selected{% endif %}>
+                                    {{ ocena }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold" for="ocena_egzamin">Egzamin</label>
+                            <select class="form-select" id="ocena_egzamin" name="ocena_egzamin">
+                                <option value="">— brak —</option>
+                                {% for ocena in [2.0, 3.0, 3.5, 4.0, 4.5, 5.0] %}
+                                <option value="{{ ocena }}"
+                                    {% if formularz.ocena_egzamin == ocena %}selected{% endif %}>
+                                    {{ ocena }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold" for="ocena_koncowa">Ocena końcowa</label>
+                            <select class="form-select" id="ocena_koncowa" name="ocena_koncowa">
+                                <option value="">— brak —</option>
+                                {% for ocena in [2.0, 3.0, 3.5, 4.0, 4.5, 5.0] %}
+                                <option value="{{ ocena }}"
+                                    {% if formularz.ocena_koncowa == ocena %}selected{% endif %}>
+                                    {{ ocena }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning small py-2 mb-3">
+                        Zapisane oceny będą widoczne dla studenta i opiekunów natychmiast po zatwierdzeniu.
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Zapisz oceny</button>
+                </form>
+
+                {% else %}
+                <div class="row text-center">
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <p class="small text-muted mb-1">Sprawozdanie</p>
+                            <span class="fs-4 fw-bold">{{ formularz.ocena_sprawozdanie or '—' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="border rounded p-3">
+                            <p class="small text-muted mb-1">Egzamin</p>
+                            <span class="fs-4 fw-bold">{{ formularz.ocena_egzamin or '—' }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="border rounded p-3 bg-light">
+                            <p class="small text-muted mb-1">Ocena końcowa</p>
+                            <span class="fs-2 fw-bold">{{ formularz.ocena_koncowa or '—' }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endif %}
+
+{% endblock %}

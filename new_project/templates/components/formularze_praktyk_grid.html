@@ -252,6 +252,19 @@
             </a>
             {% endif %}
 
+            {% if current_user.rola == 'admin' %}
+            <a
+                href="{{ url_for('admin.dziennik', student_id=formularz.student_id) }}"
+                class="btn btn-primary btn-sm">
+                Otwórz dziennik
+            </a>
+            <a
+                href="{{ url_for('admin.formularz', formularz_id=formularz.id) }}"
+                class="btn btn-secondary btn-sm ml-2 ml-2">
+                Szczegóły formularza
+            </a>
+            {% endif %}
+
         </div>
 
     </div>

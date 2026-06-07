@@ -24,7 +24,11 @@ def role_required(rola):
 def dashboard():
     now = datetime.utcnow()
     profil = None
-    return render_template('admin/dashboard.html', now=now, profil=profil)
+
+    aktywne_praktyki = models.FormularzPraktyk.query.filter_by(status='w_trakcie').count()
+    niezatwierdzone_harmonogramy = models.HarmonogramPraktyk.query.filter_by(status='oczekuje').count()
+
+    return render_template('admin/dashboard.html', now=now, profil=profil, aktywne_praktyki=aktywne_praktyki, niezatwierdzone_harmonogramy=niezatwierdzone_harmonogramy)
 
 
 # ============================================================================
@@ -180,6 +184,24 @@ def formularze():
         formularze_praktyk=formularze_praktyk
     )
 
+# === WYSWIETL FORMULARZ ===
+@admin_bp.route('/formularz/<int:formularz_id>', methods=['GET'])
+@role_required('admin')
+def formularz(formularz_id):
+    formularz = models.FormularzPraktyk.query.filter_by(id=formularz_id).first_or_404()
+
+    # liczba wpisow
+    wpisy = models.DziennikWpis.query.filter_by(student_id=formularz.student_id).all()
+    harmonogram = models.HarmonogramPraktyk.query.filter_by(student_id=formularz.student_id).first()
+    formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni
+    formularz.liczba_wpisow = len(wpisy)
+
+    print(formularz.wpisy_wymagane)
+    print(formularz.liczba_wpisow)
+
+    return render_template('components/formularz_praktyk.html', formularz=formularz)
+
+
 # === WYSWIETL DZIENNIK ===
 @admin_bp.route('/dziennik/<int:student_id>', methods=['GET'])
 @role_required('admin')
@@ -206,6 +228,95 @@ def dziennik(student_id):
         formularz=formularz,
         student=student
     )
+
+# ============================================================================
+# === ZAKONCZ PRAKTYKI ===
+# ============================================================================
+@admin_bp.route('/zakoncz-praktyki/<int:formularz_id>', methods=['POST'])
+@role_required('admin')
+def zakoncz_praktyki(formularz_id):
+    formularz = models.FormularzPraktyk.query.get_or_404(formularz_id)
+
+    # czy wszystkie wpisy zatwierdzone?
+    wpisy = models.DziennikWpis.query.filter_by(student_id=formularz.student_id).all()
+    if any(wpis.status != 'zatwierdzony' for wpis in wpisy):
+        flash('Nie można zakończyć praktyk. Wszystkie wpisy muszą być zatwierdzone.', 'danger')
+        return redirect(url_for('admin.formularz', formularz_id=formularz.id))
+    if len(wpisy) < formularz.planowana_liczba_dni:
+        flash('Nie można zakończyć praktyk. Liczba zatwierdzonych wpisów jest mniejsza niż planowana liczba dni praktyk.', 'danger')
+        return redirect(url_for('admin.formularz', formularz_id=formularz.id))
+
+    formularz.status = 'zakonczone'
+    models.db.session.commit()
+    flash('Praktyki zostały zakończone.', 'success')
+    return redirect(url_for('admin.formularze'))
+
+
+# === DODAJ OCENY -> FORMULARZ ===
+@admin_bp.route('/formularz/oceny/<int:formularz_id>', methods=['GET'])
+@role_required('admin')
+def formularz_oceny(formularz_id):
+    formularz = models.FormularzPraktyk.query.filter_by(id=formularz_id).first_or_404()
+
+    # liczba wpisow
+    wpisy = models.DziennikWpis.query.filter_by(student_id=formularz.student_id).all()
+    harmonogram = models.HarmonogramPraktyk.query.filter_by(student_id=formularz.student_id).first()
+    formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni
+    formularz.liczba_wpisow = len(wpisy)
+
+    return render_template('components/formularz_praktyk_oceny.html', formularz=formularz, current_user_profil=None)
+
+
+# === ZAPISZ OCENY FORMULARZA ===
+@admin_bp.route('/zapisz-oceny-formularz/<int:formularz_id>', methods=['POST'])
+@role_required('admin')
+def zapisz_oceny_formularz(formularz_id):
+    formularz = models.FormularzPraktyk.query.get_or_404(formularz_id)
+
+    # logika zapisywania ocen
+    ocena_sprawozdanie = request.form.get('ocena_sprawozdanie')
+    ocena_egzamin = request.form.get('ocena_egzamin')
+    ocena_koncowa = request.form.get('ocena_koncowa')
+
+    #sprawozdanie
+    if not ocena_sprawozdanie:
+        flash('Ocena sprawozdania jest wymagana.', 'danger')
+        return redirect(url_for('admin.formularz_oceny', formularz_id=formularz_id))
+    try:
+        formularz.ocena_opiekuna_uczelnianego = float(ocena_sprawozdanie) if ocena_sprawozdanie else None
+    except (ValueError, TypeError):
+        flash('Niepoprawna wartość oceny sprawozdania.', 'danger')
+        return redirect(url_for('admin.formularz_oceny', formularz_id=formularz_id))
+
+    #egzamin
+    if not ocena_egzamin:
+        flash('Ocena egzaminu jest wymagana.', 'danger')
+        return redirect(url_for('admin.formularz_oceny', formularz_id=formularz_id))
+    try:
+        formularz.ocena_opiekuna_zakladowego = float(ocena_egzamin) if ocena_egzamin else None
+    except (ValueError, TypeError):
+        flash('Niepoprawna wartość oceny zakładowego.', 'danger')
+        return redirect(url_for('admin.formularz_oceny', formularz_id=formularz_id))
+
+    #koncowa
+    if not ocena_koncowa:
+        flash('Ocena końcowa jest wymagana.', 'danger')
+        return redirect(url_for('admin.formularz_oceny', formularz_id=formularz_id))
+    try:
+        formularz.ocena_koncowa = float(ocena_koncowa) if ocena_koncowa else None
+    except (ValueError, TypeError):
+        flash('Niepoprawna wartość oceny końcowej.', 'danger')
+        return redirect(url_for('admin.formularz_oceny', formularz_id=formularz_id))
+
+    # zakonczenie praktyk
+    if formularz.ocena_opiekuna_uczelnianego and formularz.ocena_opiekuna_zakladowego and formularz.ocena_koncowa and formularz.ocena_sprawozdanie and formularz.ocena_egzamin:
+        formularz.status = 'zakonczone'
+
+    models.db.session.commit()
+    flash('Oceny końcowe zostały zapisane.', 'success')
+
+    return redirect(url_for('admin.formularz', formularz_id=formularz.id))
+
 
 # ============================================================================
 # === UZYTKOWNICY ===

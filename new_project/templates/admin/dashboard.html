@@ -4,8 +4,84 @@
 Dashboard Administratora
 {% endblock %}
 
+
+{% block styles %}
+<style>
+    .stat-card {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 2px 14px rgba(7, 16, 38, 0.08);
+        transition: transform 0.15s, box-shadow 0.15s;
+        overflow: hidden;
+    }
+    .stat-card:hover {
+        box-shadow: 0 6px 24px rgba(7, 16, 38, 0.13);
+    }
+    .stat-card .card-body {
+        padding: 1.4rem 1.6rem;
+    }
+    .stat-card .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        font-family: 'DM Mono', monospace;
+        color: var(--main-text);
+    }
+    .stat-card .stat-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--main-text-muted);
+        margin-bottom: 4px;
+    }
+    .stat-card .stat-sub {
+        font-size: 0.78rem;
+        color: var(--main-text-muted);
+        margin-top: 3px;
+    }
+</style>
+{% endblock %}
+
 {% block pagecontent %}
 <div>
     {% include 'components/mini/welcome_card.html' %}
+
+    {# ── Stat cards ── #}
+    <div class="row g-3 mb-4">
+        <div class="col-6">
+            <div class="card stat-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div>
+                        <div class="stat-label">Aktywne praktyki</div>
+                        <div class="stat-value">{{ aktywne_praktyki }}</div>
+                        <div class="stat-sub">praktyk w trakcie</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-6">
+            <div class="card stat-card h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div>
+                        <div class="stat-label">Niezatwierdzone harmonogramy</div>
+                        <div class="stat-value">{{ niezatwierdzone_harmonogramy }}</div>
+                        <div class="stat-sub">harmonogramów do zatwierdzenia</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -231,11 +231,79 @@ def formularz(formularz_id):
     formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni
     formularz.liczba_wpisow = len(wpisy)
 
-    print(formularz.wpisy_wymagane)
-    print(formularz.liczba_wpisow)
-
     return render_template('components/formularz_praktyk.html', formularz=formularz)
 
+# === DODAJ OCENY -> FORMULARZ ===
+@opiekun_bp.route('/formularz/oceny/<int:formularz_id>', methods=['GET'])
+@role_required('opiekun')
+def formularz_oceny(formularz_id):
+    formularz = models.FormularzPraktyk.query.filter_by(id=formularz_id).first_or_404()
+    current_user_profil = get_profile()
+
+    # liczba wpisow
+    wpisy = models.DziennikWpis.query.filter_by(student_id=formularz.student_id).all()
+    harmonogram = models.HarmonogramPraktyk.query.filter_by(student_id=formularz.student_id).first()
+    formularz.wpisy_wymagane = harmonogram.planowana_liczba_dni
+    formularz.liczba_wpisow = len(wpisy)
+
+    return render_template('components/formularz_praktyk_oceny.html', formularz=formularz, current_user_profil=current_user_profil)
+
+
+# === DODAJ OCENY ===
+@opiekun_bp.route('/zapisz-ocene-zakladowy/<int:formularz_id>', methods=['POST'])
+@role_required('opiekun')
+def zapisz_ocene_zakladowy(formularz_id):
+    current_user_profil = get_profile()
+
+    if current_user_profil.typ_opiekuna != 'zakladowy':
+        flash('Nie masz uprawnień do tej akcji.', 'danger')
+        return redirect(url_for('opiekun.formularz', formularz_id=formularz_id))
+    
+    formularz = models.FormularzPraktyk.query.get_or_404(formularz_id)
+    ocena_zakladowy = request.form.get('ocena_opiekuna_zakladowego')
+    opinia_opiekuna_zakladowego = request.form.get('opinia_opiekuna_zakladowego', '').strip()
+    if not opinia_opiekuna_zakladowego:
+        flash('Opinia opiekuna zakładowego jest wymagana.', 'danger')
+        return redirect(url_for('opiekun.formularz_oceny', formularz_id=formularz_id))
+    try:
+        formularz.ocena_opiekuna_zakladowego = float(ocena_zakladowy) if ocena_zakladowy else None
+    except (ValueError, TypeError):
+        flash('Niepoprawna wartość oceny zakładowego.', 'danger')
+        return redirect(url_for('opiekun.formularz_oceny', formularz_id=formularz_id))
+
+    formularz.opinia_opiekuna_zakladowego = opinia_opiekuna_zakladowego
+    models.db.session.commit()
+    flash('Ocena opiekuna zakładowego została zapisana.', 'success')
+
+    return redirect(url_for('opiekun.formularz', formularz_id=formularz.id))
+
+# === DODAJ OCENY UCZELNIANE ===
+@opiekun_bp.route('/zapisz-ocene-uczelniany/<int:formularz_id>', methods=['POST'])
+@role_required('opiekun')
+def zapisz_ocene_uczelniany(formularz_id):
+    current_user_profil = get_profile()
+
+    if current_user_profil.typ_opiekuna != 'uczelniany':
+        flash('Nie masz uprawnień do tej akcji.', 'danger')
+        return redirect(url_for('opiekun.formularz', formularz_id=formularz_id))
+
+    formularz = models.FormularzPraktyk.query.get_or_404(formularz_id)
+    ocena_uczelniany = request.form.get('ocena_opiekuna_uczelnianego')
+    opinia_opiekuna_uczelnianego = request.form.get('opinia_opiekuna_uczelnianego', '').strip()
+    if not opinia_opiekuna_uczelnianego:
+        flash('Opinia opiekuna uczelnianego jest wymagana.', 'danger')
+        return redirect(url_for('opiekun.formularz_oceny', formularz_id=formularz_id))
+    try:
+        formularz.ocena_opiekuna_uczelnianego = float(ocena_uczelniany) if ocena_uczelniany else None
+    except (ValueError, TypeError):
+        flash('Niepoprawna wartość oceny uczelnianego.', 'danger')
+        return redirect(url_for('opiekun.formularz_oceny', formularz_id=formularz_id))
+
+    formularz.opinia_opiekuna_uczelnianego = opinia_opiekuna_uczelnianego
+    models.db.session.commit()
+    flash('Ocena opiekuna uczelnianego została zapisana.', 'success')
+
+    return redirect(url_for('opiekun.formularz', formularz_id=formularz.id))
 
 # ============================================================================
 # === PROFILE ===

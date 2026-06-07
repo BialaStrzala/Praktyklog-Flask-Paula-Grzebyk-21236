@@ -380,97 +380,19 @@ Formularz Praktyk
 
         </div>
 
-        <!-- ================================================================================= -->
-        <!-- EFEKTY UCZENIA -->
-        <!-- ================================================================================= -->
+        {% if current_user.rola == 'opiekun' and formularz.liczba_wpisow == formularz.wpisy_wymagane %}
+        <a href="{{ url_for('opiekun.formularz_oceny', formularz_id=formularz.id) }}"
+           class="btn btn-primary">
+            Wystaw ocenę końcową
+        </a>
+        {% endif %}
 
-        <div>
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Efekty uczenia</h5>
-
-                <span class="text-muted small">
-                    {{ formularz.efekty_uczenia | length }} efektów
-                </span>
-            </div>
-
-            {% if formularz.efekty_uczenia %}
-
-            <div class="table-responsive">
-
-                <table class="table table-hover align-middle">
-
-                    <thead>
-
-                        <tr>
-                            <th>Kod</th>
-                            <th>Opis</th>
-                            <th>Zakładowy</th>
-                            <th>Uczelniany</th>
-                            <th>Uwagi</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                    {% for efekt in formularz.efekty_uczenia %}
-
-                        <tr>
-
-                            <td>
-                                <span class="badge badge-secondary">
-                                    {{ efekt.efekt.kod }}
-                                </span>
-                            </td>
-
-                            <td>
-                                {{ efekt.efekt.opis }}
-                            </td>
-
-                            <td>
-
-                                {% if efekt.czy_potwierdzony_zakladowy %}
-                                    <span class="text-success">✔ Potwierdzono</span>
-                                {% else %}
-                                    <span class="text-muted">—</span>
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-
-                                {% if efekt.czy_potwierdzony_uczelniany %}
-                                    <span class="text-success">✔ Potwierdzono</span>
-                                {% else %}
-                                    <span class="text-muted">—</span>
-                                {% endif %}
-
-                            </td>
-
-                            <td>
-                                {{ efekt.uwagi or '—' }}
-                            </td>
-
-                        </tr>
-
-                    {% endfor %}
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-            {% else %}
-
-                <div class="alert alert-light border">
-                    Brak efektów uczenia.
-                </div>
-
-            {% endif %}
-
-        </div>
+        {% if current_user.rola == 'admin' and formularz.liczba_wpisow == formularz.wpisy_wymagane %}
+        <a href="{{ url_for('admin.formularz_oceny', formularz_id=formularz.id) }}"
+           class="btn btn-primary">
+            Wystaw oceny końcowe
+        </a>
+        {% endif %}
 
     </div>
 
